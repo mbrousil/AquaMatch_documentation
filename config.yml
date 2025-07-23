@@ -40,17 +40,11 @@ default:
 use_stable:
   google_email: ""
   download_repo_directory: "../AquaMatch_download_WQP/"
-  chl_use_stable: TRUE
   chl_stable_date: "20240701" #YYYYMMDD format
-  doc_use_stable: TRUE
   doc_stable_date: "20240701" #YYYYMMDD format
-  sdd_use_stable: TRUE
   sdd_stable_date: "20240701" #YYYYMMDD format
-  tc_use_stable: TRUE
   tc_stable_date: "20240701" #YYYYMMDD format
-  tss_use_stable: TRUE
   tss_stable_date: "20241205" #YYYYMMDD format
-  general_use_stable: TRUE
   general_stable_date: "20240701" #YYYYMMDD format
   drive_project_folder: "" # folder name must end with "/", if you use a nested
   # folder location, you will need to create that folder structure before using 
@@ -60,19 +54,12 @@ use_stable:
 admin_update:
   google_email: "therossyndicate@gmail.com"
   download_repo_directory: "../AquaMatch_download_WQP/"
-  cdom_use_stable: TRUE
   cdom_stable_date: "20250626" #YYYYMMDD format
-  chl_use_stable: TRUE
   chl_stable_date: "20240701" #YYYYMMDD format
-  doc_use_stable: TRUE
   doc_stable_date: "20240701" #YYYYMMDD format
-  sdd_use_stable: TRUE
   sdd_stable_date: "20240701" #YYYYMMDD format
-  tc_use_stable: TRUE
   tc_stable_date: "20240701" #YYYYMMDD format
-  tss_use_stable: TRUE
   tss_stable_date: "20250430" #YYYYMMDD format
-  general_use_stable: TRUE
   general_stable_date: "20240701" #YYYYMMDD format
   drive_project_folder: "~/aquamatch_download_wqp/" # folder name must end with "/", 
   # if you use a nested  folder location, you will need to create that folder 
