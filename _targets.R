@@ -1,62 +1,101 @@
-# Created by use_targets().
-# Follow the comments below to fill in this target script.
-# Then follow the manual to check and run the pipeline:
-#   https://books.ropensci.org/targets/walkthrough.html#inspect-the-pipeline
-
 # Load packages required to define the pipeline:
 library(targets)
-# library(tarchetypes) # Load other packages as needed.
+library(tarchetypes)
 
 # Set target options:
 tar_option_set(
-  packages = c("tibble") # Packages that your targets need for their tasks.
-  # format = "qs", # Optionally set the default storage format. qs is fast.
-  #
-  # Pipelines that take a long time to run may benefit from
-  # optional distributed computing. To use this capability
-  # in tar_make(), supply a {crew} controller
-  # as discussed at https://books.ropensci.org/targets/crew.html.
-  # Choose a controller that suits your needs. For example, the following
-  # sets a controller that scales up to a maximum of two workers
-  # which run as local R processes. Each worker launches when there is work
-  # to do and exits if 60 seconds pass with no tasks to run.
-  #
-  #   controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
-  #
-  # Alternatively, if you want workers to run on a high-performance computing
-  # cluster, select a controller from the {crew.cluster} package.
-  # For the cloud, see plugin packages like {crew.aws.batch}.
-  # The following example is a controller for Sun Grid Engine (SGE).
-  # 
-  #   controller = crew.cluster::crew_controller_sge(
-  #     # Number of workers that the pipeline can scale up to:
-  #     workers = 10,
-  #     # It is recommended to set an idle time so workers can shut themselves
-  #     # down if they are not running tasks.
-  #     seconds_idle = 120,
-  #     # Many clusters install R as an environment module, and you can load it
-  #     # with the script_lines argument. To select a specific verison of R,
-  #     # you may need to include a version string, e.g. "module load R/4.3.2".
-  #     # Check with your system administrator if you are unsure.
-  #     script_lines = "module load R"
-  #   )
-  #
-  # Set other options as needed.
+  packages = c("tidyverse"),
+  memory = "transient",
+  garbage_collection = TRUE,
+  seed = 1
 )
 
-# Run the R scripts in the R/ folder with your custom functions:
-tar_source()
-# tar_source("other_functions.R") # Source other scripts as needed.
+# Run the R scripts with custom functions:
+tar_source(
+  files = c(
+    "src/",
+    "create_bookdown.R")
+)
 
 # Replace the target list below with your own:
-list(
+config_targets <- list(
+  
+  # Grab configuration information for the workflow run (config.yml)
   tar_target(
-    name = data,
-    command = tibble(x = rnorm(100), y = rnorm(100))
-    # format = "qs" # Efficient storage for general data objects.
+    name = p0_harmonization_config,
+    # The config package does not like to be used with library()
+    command = config::get(config = "admin_update"),
+    cue = tar_cue("always")
   ),
+  
+  # Google Drive IDs
+  # More manual interaction with these datasets is required, so not designed to
+  # be locally passed from pipeline to pipeline
+  
+  # tar_file_read(
+  #   name = p2_general_drive_ids,
+  #   command = paste0(p0_AquaMatch_download_WQP_directory,
+  #                    "2_download/out/general_drive_ids.csv"),
+  #   cue = tar_cue("always"),
+  #   read = read_csv(file = !!.x)
+  # ),
+  
+  # tar_target(
+  #   name = p2_chl_drive_ids,
+  #   command = tribble(
+  #     ~name, ~id,
+  #     
+  #   ),
+  #   read = read_csv(file = !!.x)
+  # ),
+  
+  # tar_file_read(
+  #   name = p2_doc_drive_ids,
+  #   command = paste0(p0_AquaMatch_download_WQP_directory,
+  #                    "2_download/out/doc_drive_ids.csv"),
+  #   cue = tar_cue("always"),
+  #   read = read_csv(file = !!.x)
+  # ),
+  # 
+  # tar_file_read(
+  #   name = p2_sdd_drive_ids,
+  #   command = paste0(p0_AquaMatch_download_WQP_directory,
+  #                    "2_download/out/sdd_drive_ids.csv"),
+  #   cue = tar_cue("always"),
+  #   read = read_csv(file = !!.x)
+  # ),
+  
   tar_target(
-    name = model,
-    command = coefficients(lm(y ~ x, data = data))
+    name = p2_tss_drive_ids,
+    command = tribble(
+      ~name, ~id,
+      "p1_wqp_params_tss_20250430.rds", "1tI5lF80-dTvUgaOWD7SVubI9yV1f4nB2",
+      "p2_site_counts_tss_20250430.rds","1oRZzRHhaTk09lExlk4q63EF7viiya2uv"
+    ),
+    cue = tar_cue("always")
+  ),
+  
+  # tar_file_read(
+  #   name = p2_cdom_drive_ids,
+  #   command = paste0(p0_AquaMatch_download_WQP_directory,
+  #                    "2_download/out/cdom_drive_ids.csv"),
+  #   cue = tar_cue("always"),
+  #   read = read_csv(file = !!.x)
+  # ),
+  
+  # Site counts
+  # TSS
+  tar_target(
+    name = p2_site_counts_tss,
+    command = retrieve_data(target = "p2_site_counts_tss",
+                            id_df = p2_tss_drive_ids,
+                            local_folder = "in/tss",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$tss_stable_date),
+    packages = c("tidyverse", "googledrive")
   )
 )
+
+# Full targets list
+c(config_targets,
+  bookdown_targets_list)
