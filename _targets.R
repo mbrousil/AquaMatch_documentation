@@ -42,38 +42,17 @@ config_targets <- list(
     ),
     cue = tar_cue("always")  ),
   
-  # AOI grid
   tar_target(
-    name = p1_global_grid,
-    command = retrieve_data(target = "p1_global_grid",
-                            id_df = p2_general_drive_ids,
-                            local_folder = "in/general",
-                            stable = p0_harmonization_config$general_use_stable, 
-                            google_email = p0_harmonization_config$google_email,
-                            stable_date = p0_harmonization_config$general_stable_date),
-    packages = c("tidyverse", "googledrive")
-  ), 
-  
-  # CharacteristicNames by param
-  # TSS
-  tar_target(
-    name = p1_wqp_params_tss,
-    command = retrieve_data(target = "p1_wqp_params_tss",
-                            id_df = p2_tss_drive_ids,
-                            local_folder = "in/tss",
-                            google_email = p0_harmonization_config$google_email,
-                            stable_date = p0_harmonization_config$tss_stable_date),
-    packages = c("tidyverse", "googledrive")
-  ),  
-  
-  # tar_target(
-  #   name = p2_chl_drive_ids,
-  #   command = tribble(
-  #     ~name, ~id,
-  #     
-  #   ),
-  #   read = read_csv(file = !!.x)
-  # ),
+    name = p2_chl_drive_ids,
+    command = tribble(
+      ~name, ~id,
+      # Respond to user date choices
+      paste0("p1_wqp_params_chl_", p0_harmonization_config$chl_stable_date, ".rds"), "1MtHbroy3d1wZgfiu1rxCTSdhMIO6lar8",
+      paste0("p2_site_counts_chl_", p0_harmonization_config$chl_stable_date, ".rds"),"1xkmY74scyQtxopimGEC_aMMD5XZo0IZy",
+      paste0("p3_documented_drops_chla_", p0_harmonization_config$chl_stable_date, ".rds"), "1s2VAH4Z1BQxLtVC6O__SKyicBwK3ZsQJ"
+    ),
+    cue = tar_cue("always")
+  ),
   
   # tar_file_read(
   #   name = p2_doc_drive_ids,
@@ -111,7 +90,56 @@ config_targets <- list(
   #   read = read_csv(file = !!.x)
   # ),
   
+  # AOI grid
+  tar_target(
+    name = p1_global_grid,
+    command = retrieve_data(target = "p1_global_grid",
+                            id_df = p2_general_drive_ids,
+                            local_folder = "in/general",
+                            stable = p0_harmonization_config$general_use_stable, 
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$general_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ), 
+  
+  
+  # CharacteristicNames by param
+  # Chl
+  tar_target(
+    name = p1_wqp_params_chl,
+    command = retrieve_data(target = "p1_wqp_params_chl",
+                            id_df = p2_chl_drive_ids,
+                            local_folder = "in/chl",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$chl_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),  
+  
+  
+  # TSS
+  tar_target(
+    name = p1_wqp_params_tss,
+    command = retrieve_data(target = "p1_wqp_params_tss",
+                            id_df = p2_tss_drive_ids,
+                            local_folder = "in/tss",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$tss_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),  
+  
+  
   # Site counts
+  # Chl
+  tar_target(
+    name = p2_site_counts_chl,
+    command = retrieve_data(target = "p2_site_counts_chl",
+                            id_df = p2_chl_drive_ids,
+                            local_folder = "in/chl",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$chl_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),
+  
   # TSS
   tar_target(
     name = p2_site_counts_tss,
@@ -124,6 +152,17 @@ config_targets <- list(
   ),
   
   # Documentation of dropped rows
+  # Chl
+  tar_target(
+    name = p3_documented_drops_chla,
+    command = retrieve_data(target = "p3_documented_drops_chla",
+                            id_df = p2_chl_drive_ids,
+                            local_folder = "in/chl",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$chl_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),
+  
   # TSS
   tar_target(
     name = p3_documented_drops_tss,
@@ -136,6 +175,14 @@ config_targets <- list(
   ),
   
   # Unit tables
+  # Chla
+  tar_file_read(
+    name = chla_unit_table,
+    command = "in/chla/chla_unit_table.csv",
+    cue = tar_cue("always"),
+    read = read_csv(file = !!.x)
+  ),
+  
   # TSS
   tar_file_read(
     name = tss_unit_table,

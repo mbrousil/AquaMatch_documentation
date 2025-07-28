@@ -14,8 +14,8 @@ bookdown_targets_list <- list(
   tar_file(tiering_overview_rmd,
            "bookdown_raw/03_tiering_overview.Rmd"),
   # 
-  # tar_file(chla_harmonization_rmd,
-  #          "bookdown_raw/04_chla_harmonization.Rmd"),
+  tar_file(chla_harmonization_rmd,
+           "bookdown_raw/04_chla_harmonization.Rmd"),
   # 
   # tar_file(doc_harmonization_rmd,
   #          "bookdown_raw/05_doc_harmonization.Rmd"),
@@ -56,7 +56,7 @@ bookdown_targets_list <- list(
       download_rmd,
       params = list(
         site_counts = bind_rows(
-          # p2_site_counts_chl,
+          p2_site_counts_chl,
           # p2_site_counts_doc,
           # p2_site_counts_sdd,
           p2_site_counts_tss#,
@@ -64,7 +64,7 @@ bookdown_targets_list <- list(
         ),
         global_grid = p1_global_grid,
         yaml_contents = list(
-          # chlorophyll = p1_wqp_params_chl$chlorophyll,
+          chlorophyll = p1_wqp_params_chl$chlorophyll,
           # doc = p1_wqp_params_doc$doc,
           # sdd = p1_wqp_params_sdd$sdd,
           tss = p1_wqp_params_tss$tss#,
@@ -88,20 +88,21 @@ bookdown_targets_list <- list(
     packages = c("tidyverse", "bookdown", "rmarkdown")
   ),
   
-  # tar_target(
-  #   chla_harmonization_report,
-  #   render(
-  #     chla_harmonization_rmd,
-  #     params = list(
-  #       documented_drops = p3_documented_drops,
-  #       chla_chars = p1_wqp_params_chl$chlorophyll),
-  #     output_file = "04_chla_harmonization",
-  #     output_dir = "chapters") %>%
-  #     change_ext(inext = "md", outext = "Rmd"),
-  #   format = "file",
-  #   packages = c("tidyverse", "bookdown", "ggrepel", "viridis", "kableExtra",
-  #                "rmarkdown")
-  # ),
+  tar_target(
+    chla_harmonization_report,
+    render(
+      chla_harmonization_rmd,
+      params = list(
+        documented_drops = p3_documented_drops_chla,
+        chla_chars = p1_wqp_params_chl$chl,
+        chla_unit_table = chla_unit_table),
+      output_file = "07_chla_harmonization",
+      output_dir = "chapters") %>%
+      change_ext(inext = "md", outext = "Rmd"),
+    format = "file",
+    packages = c("tidyverse", "bookdown", "ggrepel", "viridis", "kableExtra",
+                 "rmarkdown")
+  ),
   # 
   # tar_target(
   #   doc_harmonization_report,
@@ -194,7 +195,7 @@ bookdown_targets_list <- list(
                      deps = c(technical_details,
                               download_report,
                               tiering_overview,
-                              # chla_harmonization_report,
+                              chla_harmonization_report,
                               # doc_harmonization_report,
                               # sdd_harmonization_report,
                               tss_harmonization_report,
