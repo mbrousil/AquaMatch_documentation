@@ -62,13 +62,17 @@ config_targets <- list(
   #   read = read_csv(file = !!.x)
   # ),
   # 
-  # tar_file_read(
-  #   name = p2_sdd_drive_ids,
-  #   command = paste0(p0_AquaMatch_download_WQP_directory,
-  #                    "2_download/out/sdd_drive_ids.csv"),
-  #   cue = tar_cue("always"),
-  #   read = read_csv(file = !!.x)
-  # ),
+  tar_target(
+    name = p2_sdd_drive_ids,
+    command = tribble(
+      ~name, ~id,
+      # Respond to user date choices
+      paste0("p1_wqp_params_sdd_", p0_harmonization_config$sdd_stable_date, ".rds"), "1ha9C8_LJlOzCottstGaZCrjSmrswL-JJ",
+      paste0("p2_site_counts_sdd_", p0_harmonization_config$sdd_stable_date, ".rds"),"1uu60NG_L2a5sUKCzCA8N64KzgxXHGwWJ",
+      paste0("p3_documented_drops_sdd_", p0_harmonization_config$sdd_stable_date, ".rds"), "1PvtQC-ehT-2s3iXH_GPQA3Y32k6oLKDS"
+    ),
+    cue = tar_cue("always")
+  ),  
   
   tar_target(
     name = p2_tss_drive_ids,
@@ -109,12 +113,23 @@ config_targets <- list(
     name = p1_wqp_params_chl,
     command = retrieve_data(target = "p1_wqp_params_chl",
                             id_df = p2_chl_drive_ids,
-                            local_folder = "in/chl",
+                            local_folder = "in/chla",
                             google_email = p0_harmonization_config$google_email,
                             stable_date = p0_harmonization_config$chl_stable_date),
     packages = c("tidyverse", "googledrive")
   ),  
   
+  
+  # SDD
+  tar_target(
+    name = p1_wqp_params_sdd,
+    command = retrieve_data(target = "p1_wqp_params_sdd",
+                            id_df = p2_sdd_drive_ids,
+                            local_folder = "in/sdd",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$sdd_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),  
   
   # TSS
   tar_target(
@@ -134,9 +149,20 @@ config_targets <- list(
     name = p2_site_counts_chl,
     command = retrieve_data(target = "p2_site_counts_chl",
                             id_df = p2_chl_drive_ids,
-                            local_folder = "in/chl",
+                            local_folder = "in/chla",
                             google_email = p0_harmonization_config$google_email,
                             stable_date = p0_harmonization_config$chl_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),
+  
+  # SDD
+  tar_target(
+    name = p2_site_counts_sdd,
+    command = retrieve_data(target = "p2_site_counts_sdd",
+                            id_df = p2_sdd_drive_ids,
+                            local_folder = "in/sdd",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$sdd_stable_date),
     packages = c("tidyverse", "googledrive")
   ),
   
@@ -157,9 +183,20 @@ config_targets <- list(
     name = p3_documented_drops_chla,
     command = retrieve_data(target = "p3_documented_drops_chla",
                             id_df = p2_chl_drive_ids,
-                            local_folder = "in/chl",
+                            local_folder = "in/chla",
                             google_email = p0_harmonization_config$google_email,
                             stable_date = p0_harmonization_config$chl_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),
+  
+  # SDD
+  tar_target(
+    name = p3_documented_drops_sdd,
+    command = retrieve_data(target = "p3_documented_drops_sdd",
+                            id_df = p2_sdd_drive_ids,
+                            local_folder = "in/sdd",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$sdd_stable_date),
     packages = c("tidyverse", "googledrive")
   ),
   
@@ -179,6 +216,14 @@ config_targets <- list(
   tar_file_read(
     name = chla_unit_table,
     command = "in/chla/chla_unit_table.csv",
+    cue = tar_cue("always"),
+    read = read_csv(file = !!.x)
+  ),
+  
+  # SDD
+  tar_file_read(
+    name = sdd_unit_table,
+    command = "in/sdd/sdd_unit_table.csv",
     cue = tar_cue("always"),
     read = read_csv(file = !!.x)
   ),
