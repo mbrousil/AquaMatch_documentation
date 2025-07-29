@@ -5,6 +5,7 @@ output:
 params:
   documented_drops: NA
   sdd_chars: NA
+  sdd_unit_table: NA
 always_allow_html: true
 ---
 
@@ -286,14 +287,14 @@ Below are pie charts that break down the number of failure detections by column.
 <br>
 
 #### ResultCommentText fail detects
-<img src="3_harmonize/out/sdd_ResultCommentText_fail_pie.png" alt="ResultCommentText failure detects" width="650"/>
+<img src="in/sdd/sdd_ResultCommentText_fail_pie.png" alt="ResultCommentText failure detects" width="650"/>
 
 #### ResultDetectionConditionText fail detects
 
-<img src="3_harmonize/out/sdd_ResultDetectionConditionText_fail_pie.png" alt="ResultDetectionConditionText failure detects" width="650"/>
+<img src="in/sdd/sdd_ResultDetectionConditionText_fail_pie.png" alt="ResultDetectionConditionText failure detects" width="650"/>
 
 #### ResultMeasureValue_original fail detects
-<img src="3_harmonize/out/sdd_ResultMeasureValue_original_fail_pie.png" alt="ResultMeasureValue_original failure detects" width="650"/>
+<img src="in/sdd/sdd_ResultMeasureValue_original_fail_pie.png" alt="ResultMeasureValue_original failure detects" width="650"/>
 
 <br>
 
@@ -601,7 +602,7 @@ step_11_dropped <- filter(step_data,
 The next step in SDD harmonization is converting the units of WQP records. We create the following conversion table, which is used to translate units provided in WQP into meters (m):
 
 ```{r echo=FALSE, message = FALSE}
-read_csv("../3_harmonize/out/sdd_unit_table.csv") %>%
+read_csv("../in/sdd/sdd_unit_table.csv") %>%
   kable() %>%
   kable_paper() %>%
   kable_styling(full_width = FALSE)
@@ -614,7 +615,7 @@ Below is a pie chart that breaks down the different unit codes that were dropped
 <br>
 
 
-<img src="3_harmonize/out/sdd_unit_drop_pie.png" alt="ResultMeasure.MeasureUnitCode mismatched codes" width="650"/>
+<img src="in/sdd/sdd_unit_drop_pie.png" alt="ResultMeasure.MeasureUnitCode mismatched codes" width="650"/>
 
 <br>
 
@@ -622,7 +623,7 @@ Additionally we provide a set of histograms of harmonized measurements by `Chara
 
 <br>
 
-<img src="3_harmonize/out/sdd_charname_dists.png" alt="Distribution of SDD values by CharacteristicName" width="650"/>
+<img src="in/sdd/sdd_charname_dists.png" alt="Distribution of SDD values by CharacteristicName" width="650"/>
 
 <br>
 
@@ -1022,25 +1023,25 @@ Below are several sets of figures illustrating different qualities of the datase
 
 <br>
 
-<img src="3_harmonize/out/sdd_tier_dists_postagg.png" alt="Distribution of SDD values by tier" width="650"/>
+<img src="in/sdd/sdd_tier_dists_postagg.png" alt="Distribution of SDD values by tier" width="650"/>
 
 
-<img src="3_harmonize/out/sdd_tier_cv_dists_postagg.png" alt="Distribution of SDD CVs by tier" width="650"/>
+<img src="in/sdd/sdd_tier_cv_dists_postagg.png" alt="Distribution of SDD CVs by tier" width="650"/>
 
 <br>
 
 2. Maps showing the geographic distribution of records by tier within the US:
 
-<img src="3_harmonize/out/sdd_tier_hex_map.png" alt="Geographic distribution of SDD *a* records by tier in the conterminous US" width="650"/>
+<img src="in/sdd/sdd_tier_hex_map.png" alt="Geographic distribution of SDD *a* records by tier in the conterminous US" width="650"/>
 
 <br>
 
 3. Lastly, bar charts showing the distribution of values by tier across years, months, and days of the week:
 
-<img src="3_harmonize/out/sdd_year_tier_chart.png" alt="Temporal distribution of SDD *a* records by tier across years" width="650"/>
+<img src="in/sdd/sdd_year_tier_chart.png" alt="Temporal distribution of SDD *a* records by tier across years" width="650"/>
 
-<img src="3_harmonize/out/sdd_month_tier_chart.png" alt="Temporal distribution of SDD *a* records by tier across months" width="650"/>
+<img src="in/sdd/sdd_month_tier_chart.png" alt="Temporal distribution of SDD *a* records by tier across months" width="650"/>
 
-<img src="3_harmonize/out/sdd_wday_tier_chart.png" alt="Temporal distribution of SDD *a* records by tier across days of the week" width="650"/>
+<img src="in/sdd/sdd_wday_tier_chart.png" alt="Temporal distribution of SDD *a* records by tier across days of the week" width="650"/>
 
 <br>
