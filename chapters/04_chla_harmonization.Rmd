@@ -19,7 +19,7 @@ harmonization process.
 At the start of the pre-harmonization process the raw chlorophyll WQP
 dataset contains 4.7 million rows.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 <br>
 
@@ -40,7 +40,7 @@ below criteria are met the row is flagged as missing:
 50.7 thousand rows are dropped, resulting in a final count of 4.6
 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 <br>
 
@@ -65,7 +65,7 @@ drop 10% or more of the available data.
 This step removes 40.2 thousand rows of data, leaving it with 4.6
 million rows remaining.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 <br>
 
@@ -89,7 +89,7 @@ We next ensure that the media type for all chlorophyll data is
 `"Surface Water"`, `"Water"`, `"Estuary"`, or `NA`. 2886 rows are
 removed. The final row count after this is 4.6 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 <br>
 
@@ -142,7 +142,7 @@ failure phrases are not mutually exclusive.
 89 thousand rows are removed after detecting failure-related phrases and
 4.5 million rows remain.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 <br>
 
@@ -174,7 +174,7 @@ assigned a 2.
 This should not result in a change in rows but we still check: 0 rows
 are removed. The final row count after this is 4.5 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 <br>
 
@@ -203,7 +203,7 @@ usable numeric value provided (and thus doesn’t need correction).
 This should not result in a change in rows but we still check: 0 rows
 are removed. The final row count after this is 4.5 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 <br>
 
@@ -229,7 +229,7 @@ Records with corrected values based on the above method are noted with a
 This should not result in a change in rows but we still check: 0 rows
 are removed. The final row count after this is 4.5 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 <br>
 
@@ -246,7 +246,7 @@ point.
 26.1 thousand rows are removed. The final row count after this is 4.5
 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 <br>
 
@@ -401,7 +401,7 @@ by `CharacteristicName`:
 242.7 thousand rows are removed. The final row count after this is 4.2
 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 <br>
 
@@ -415,7 +415,7 @@ philosophy* chapter.
 This should not result in a change in rows but we still check: 0 rows
 are removed. The final row count after this is 4.2 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 <br>
 
@@ -494,7 +494,7 @@ row counts corresponded to each method.
 
 <br>
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
 <br>
 
@@ -532,7 +532,7 @@ No records should be removed by this process and so there are 0 rows
 dropped leaving 4.2 million remaining in the harmonized chlorophyll *a*
 dataset.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 <br>
 
@@ -549,7 +549,7 @@ No records should be removed by this process and so there are 0 rows
 dropped leaving 4.2 million remaining in the harmonized chlorophyll *a*
 dataset.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 <br>
 
@@ -561,7 +561,7 @@ beyond a realistic threshold. We use 1000 ug/L as our cutoff for removal
 
 7662 rows are removed. The final row count after this is 4.2 million.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 <br>
 
@@ -603,7 +603,7 @@ recorded in the `harmonized_row_count` column.
 0.8 million rows dropped leaving 3.4 million remaining in the final
 harmonized and aggregated chlorophyll *a* dataset.
 
-![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_chla_harmonization_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 <br>
 

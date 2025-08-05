@@ -80,6 +80,52 @@ Chlorophyll a - Phytoplankton (suspended)
 </tr>
 <tr>
 <td style="text-align:left;vertical-align: top !important;" rowspan="3">
+doc
+</td>
+<td style="text-align:left;">
+Organic carbon
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Total carbon
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-purgeable Organic Carbon (NPOC)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;vertical-align: top !important;" rowspan="5">
+sdd
+</td>
+<td style="text-align:left;">
+Depth, Secchi disk depth
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Depth, Secchi disk depth (choice list)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Secchi Reading Condition (choice list)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Secchi depth
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Water transparency, Secchi disc
+</td>
+</tr>
+<tr>
+<td style="text-align:left;vertical-align: top !important;" rowspan="3">
 tss
 </td>
 <td style="text-align:left;">
