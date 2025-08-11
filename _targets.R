@@ -36,7 +36,6 @@ config_targets <- list(
     name = p2_general_drive_ids,
     command = tribble(
       ~name, ~id,
-      # Respond to user date choices
       "p1_global_grid_20240701.rds", "1Aiyd1hFyJXAdSOk8Q-BQBaHrnsIX4_96"
     ),
     cue = tar_cue("always")
@@ -46,7 +45,6 @@ config_targets <- list(
     name = p2_chl_drive_ids,
     command = tribble(
       ~name, ~id,
-      # Respond to user date choices
       "p1_wqp_params_chl_20240701.rds", "1MtHbroy3d1wZgfiu1rxCTSdhMIO6lar8",
       "p2_site_counts_chl_20240701.rds","1xkmY74scyQtxopimGEC_aMMD5XZo0IZy",
       "p3_documented_drops_chla_20240701.rds", "1s2VAH4Z1BQxLtVC6O__SKyicBwK3ZsQJ"
@@ -58,7 +56,6 @@ config_targets <- list(
     name = p2_doc_drive_ids,
     command = tribble(
       ~name, ~id,
-      # Respond to user date choices
       "p1_wqp_params_doc_20240701.rds", "1Zg4I4UVovzAoZlldX2PVYgrl-Jp8WDtU",
       "p2_site_counts_doc_20240701.rds","1SOvg5D4-vNB8B_U95kbwq9I7jmk2iLhH",
       "p3_documented_drops_doc_20240701.rds", "1qP5hvr3vu4BbRu1SAhiCdW-fvgHjlLzT"
@@ -66,12 +63,10 @@ config_targets <- list(
     cue = tar_cue("always")
   ),
   
-  
   tar_target(
     name = p2_sdd_drive_ids,
     command = tribble(
       ~name, ~id,
-      # Respond to user date choices
       "p1_wqp_params_sdd_20240701.rds", "1ha9C8_LJlOzCottstGaZCrjSmrswL-JJ",
       "p2_site_counts_sdd_20240701.rds","1uu60NG_L2a5sUKCzCA8N64KzgxXHGwWJ",
       "p3_documented_drops_sdd_20240701.rds", "1PvtQC-ehT-2s3iXH_GPQA3Y32k6oLKDS"
@@ -83,7 +78,6 @@ config_targets <- list(
     name = p2_tss_drive_ids,
     command = tribble(
       ~name, ~id,
-      # Respond to user date choices
       "p1_wqp_params_tss_20250430.rds", "1tI5lF80-dTvUgaOWD7SVubI9yV1f4nB2",
       "p2_site_counts_tss_20250430.rds","1oRZzRHhaTk09lExlk4q63EF7viiya2uv",
       "p3_documented_drops_tss_20250430.rds", "1S6tse63RUetc8Y_ipXkpcNGi9kQxZHge"
