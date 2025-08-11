@@ -37,10 +37,10 @@ config_targets <- list(
     command = tribble(
       ~name, ~id,
       # Respond to user date choices
-      "p1_global_grid_20240701.rds", "1Aiyd1hFyJXAdSOk8Q-BQBaHrnsIX4_96"#,
-      # paste0("p1_wqp_site_info_", p0_harmonization_config$general_stable_date, ".rds"), "1CMY4ON882jwbQcIOL2aAgBAM7X4BaL3R"
+      "p1_global_grid_20240701.rds", "1Aiyd1hFyJXAdSOk8Q-BQBaHrnsIX4_96"
     ),
-    cue = tar_cue("always")  ),
+    cue = tar_cue("always")
+  ),
   
   tar_target(
     name = p2_chl_drive_ids,
