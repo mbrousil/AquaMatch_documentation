@@ -7,3 +7,5 @@ This repository is covered by the MIT use license. We request that all downstrea
 ## Purpose
 
 This repository hosts the GitHub Pages website containing the [{bookdown}](https://bookdown.org/) documentation for the [AquaMatch WQP harmonization](https://github.com/AquaSat/AquaMatch_harmonize_WQP) process.
+
+Site: aquasat.github.io/AquaMatch_documentation
