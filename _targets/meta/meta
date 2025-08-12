@@ -1,0 +1,51 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+download_rmd|stem|642c30ba0153c0b4|960e53757676ee77|2c530c1562a7fbd1|-2100500327|bookdown_raw/02_download.Rmd|t20224.2610204422s|s7915b|7915|file|local|vector|||0||
+tss_harmonization_rmd|stem|08190be2dcf142bf|5811d37fa9c02168|2c530c1562a7fbd1|1698342579|bookdown_raw/07_tss_harmonization.Rmd|t20293.8581904001s|s42975b|42975|file|local|vector|||0.001||
+tiering_overview_rmd|stem|5df1eddea6bded16|4883f4ee679d3514|2c530c1562a7fbd1|-51731708|bookdown_raw/03_tiering_overview.Rmd|t20224.261020447s|s13954b|13954|file|local|vector|||0||
+technical_details_rmd|stem|1fe271b9c08b2cb2|cc96ef0fbdba3502|2c530c1562a7fbd1|2097633262|bookdown_raw/01_technical_details.Rmd|t20062.1363137708s|s1803b|1803|file|local|vector|||0||
+notes_rmd|stem|ab304c1bdf846a4a|f44a6fc88d59cc52|2c530c1562a7fbd1|-1121851326|bookdown_raw/notes.Rmd|t19852.9219273163s|s219b|219|file|local|vector|||0||
+references_rmd|stem|f711c0bcf9b14ff7|06402cd9c6535d81|2c530c1562a7fbd1|692689287|bookdown_raw/references.Rmd|t20224.2610204533s|s2601b|2601|file|local|vector|||0||
+p2_site_counts_tss|stem|216fa5eec5c7e14e|8e873212cfbdb640|d3025e82d02b7161|426749689||t20293.8584553583s|s3767345b|3767345|rds|local|vector|||2.839||
+p1_wqp_params_tss|stem|b43f9f3897fe7229|1a8f2aeb1522c2cc|d3025e82d02b7161|552648820||t20293.8584759169s|s156b|156|rds|local|vector|||1.695||
+p3_documented_drops_tss|stem|ba11e173caf652a7|fe6b0fe08f0a4492|d3025e82d02b7161|-59646856||t20293.8584890975s|s954b|954|rds|local|vector|||1.066||
+chla_harmonization_rmd|stem|9747564c6d16ed6e|3ffb6225e8a4ef1e|2c530c1562a7fbd1|903890553|bookdown_raw/04_chla_harmonization.Rmd|t20297.8568494972s|s41610b|41610|file|local|vector|||0||
+p3_documented_drops_chla|stem|2799cdbb0c0af939|279564031003e333|fd0cb1e289bb2b77|-1251893624||t20297.8895626784s|s962b|962|rds|local|vector|||1.864||
+p1_wqp_params_chl|stem|a4bcfd0ce4b0ccb3|da59064e4cc85094|fd0cb1e289bb2b77|-911358903||t20297.8895783075s|s206b|206|rds|local|vector|||1.275||
+p2_site_counts_chl|stem|6bfe41f054124fdc|6fd4deea5b3dbbe0|fd0cb1e289bb2b77|-1476812566||t20297.8896124484s|s2707844b|2707844|rds|local|vector|||2.501||
+p2_site_counts_sdd|stem|2bfb634e676a8e3f|b14517988ecf38f8|f8d6f5253609fa94|-1493179969||t20297.922611544s|s2154173b|2154173|rds|local|vector|||5.514||
+p3_documented_drops_sdd|stem|a7943421937a553a|27c1a16395eed5dc|f8d6f5253609fa94|-1510068693||t20297.9226222324s|s986b|986|rds|local|vector|||0.85||
+p1_wqp_params_sdd|stem|6adba88feb6827b8|e65ca603dd440568|f8d6f5253609fa94|-1779224686||t20297.9226375157s|s174b|174|rds|local|vector|||1.245||
+sdd_harmonization_rmd|stem|491e80d1cf1df830|0a9c4f96bd60d62e|2c530c1562a7fbd1|-1479375723|bookdown_raw/06_sdd_harmonization.Rmd|t20298.9016928076s|s43447b|43447|file|local|vector|||0||
+p1_global_grid|stem|ae26a76023acf24d|1c4319b44a5ed922|f4f5e9e5be37d132|-426238568||t20305.9232935869s|s145711b|145711|rds|local|vector|||4.496||
+p3_documented_drops_doc|stem|283be716805c52f3|c6fedc70809bfe33|d56c8bac5308f68f|-1578514760||t20305.9240753359s|s952b|952|rds|local|vector|||1.232||
+p1_wqp_params_doc|stem|0165d66583da4665|c099fb1a32c84ed6|d56c8bac5308f68f|-422113111||t20305.9248186246s|s132b|132|rds|local|vector|||1.233||
+p2_site_counts_doc|stem|caf468c4722b3cb8|b1f301f8e6bbd005|d56c8bac5308f68f|-1010652745||t20305.9248411598s|s2181400b|2181400|rds|local|vector|||1.631||
+doc_harmonization_rmd|stem|3fe551ceb2fb9d13|5c963917716bb1f7|2c530c1562a7fbd1|-675207558|bookdown_raw/05_doc_harmonization.Rmd|t20305.9253374562s|s42011b|42011|file|local|vector|||0||
+retrieve_data|function|d1438e28586b6f4d
+render_with_deps|function|c57b41a03b1c9dbf
+change_ext|function|5d31a5ef7a603005
+chla_unit_table_file|stem|501a9665f02cd0c2|3f72c4bedbf495f3|2c530c1562a7fbd1|-2010615464|in/chla/chla_unit_table.csv|t19926.9630439815s|s175b|175|file|local|vector|||0.24|package ‘ggplot2’ was built under R version 4.4.1. package ‘tibble’ was built under R version 4.4.1. package ‘purrr’ was built under R version 4.4.1. package ‘lubridate’ was built under R version 4.4.1|
+p0_harmonization_config|stem|a7f5fb5dfe625629|382a299abb1bf370|2c530c1562a7fbd1|1344086260||t20305.9317446026s|s374b|374|rds|local|vector|||0.002||
+p2_general_drive_ids|stem|7cb504529b4de597|2d56e405e8b60153|2c530c1562a7fbd1|-1938421725||t20305.9317453488s|s201b|201|rds|local|vector|||0||
+tss_unit_table_file|stem|e6ba4dbb5eb8133a|d82b0e6f4e9c2474|2c530c1562a7fbd1|-509999155|in/tss/tss_unit_table.csv|t20224.1089236111s|s173b|173|file|local|vector|||0||
+p2_sdd_drive_ids|stem|3be5526d5c7f3311|bd08b974289ab118|2c530c1562a7fbd1|1611351046||t20305.9317465598s|s305b|305|rds|local|vector|||0||
+p2_tss_drive_ids|stem|27fd9bf7fb909ae5|291818f61762c19d|2c530c1562a7fbd1|-1852103824||t20305.9317471333s|s305b|305|rds|local|vector|||0||
+p2_doc_drive_ids|stem|bce5b3cf3213fa23|80e4414680276de8|2c530c1562a7fbd1|641688820||t20305.9317477368s|s306b|306|rds|local|vector|||0.001||
+index|stem|4563487bf3d4f80c|435c6a63bcfd8d8b|2c530c1562a7fbd1|1623490255|index.Rmd|t20305.9316143553s|s4343b|4343|file|local|vector|||0||
+sdd_unit_table_file|stem|581f898f2cff48be|21b10baae12d8ffc|2c530c1562a7fbd1|1376746677|in/sdd/sdd_unit_table.csv|t19984.8734953704s|s101b|101|file|local|vector|||0||
+p2_chl_drive_ids|stem|221fbc1c7c543513|7083038c59547552|2c530c1562a7fbd1|961054774||t20305.9317494852s|s307b|307|rds|local|vector|||0.001||
+doc_unit_table_file|stem|646ebb92f1a21db5|619bb3f5b57f2b43|2c530c1562a7fbd1|-2122123752|in/doc/doc_unit_table.csv|t20033.9834143519s|s170b|170|file|local|vector|||0||
+chla_unit_table|stem|e2066422c69ad3cc|d935ef936685d198|6731b6f50fa1bf0c|1883022939||t20305.9317514979s|s381b|381|rds|local|vector|||0.076||
+tss_unit_table|stem|00b664229b3683e2|41dfa3241beac881|a5190e215a79254b|-1231820693||t20305.9317523441s|s391b|391|rds|local|vector|||0.016||
+notes|stem|aec4aa3c3605b261|171ba0678b687980|f8998925a56911a0|489592484|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/notes.Rmd|t20305.9317544349s|s139b|139|file|local|vector|||0.186|package ‘bookdown’ was built under R version 4.4.1. package ‘rmarkdown’ was built under R version 4.4.1|
+technical_details|stem|e4cc6988cfd06c47|d9a922fb671ba47f|992fbfbdf1c08926|2056883093|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/01_technical_details.Rmd|t20305.9317566434s|s1725b|1725|file|local|vector|||0.077||
+references|stem|fc911d08e09d1723|27152b4483f38ec6|0529b7ba399ee466|2089621235|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/references.Rmd|t20305.9317582009s|s2535b|2535|file|local|vector|||0.148||
+tiering_overview|stem|2ca732030923b9df|a60ae0d9ff6a0782|c3cf196e0ebde723|-2043144514|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/03_tiering_overview.Rmd|t20305.931761039s|s14130b|14130|file|local|vector|||0.127||
+sdd_unit_table|stem|c27718536818102e|751a62ec8c5f79fd|a160a5655bbe4d3c|-189921452||t20305.9317620362s|s399b|399|rds|local|vector|||0.013||
+doc_unit_table|stem|58814c6198266c2d|a635fa45d97ff087|15cd2d0fcad47537|16781699||t20305.9317628542s|s405b|405|rds|local|vector|||0.013||
+tss_harmonization_report|stem|f401b0ab9097e638|cde24c0d0914d8d1|1628a6f5ad0119ed|1722113922|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/07_tss_harmonization.Rmd|t20305.9318071078s|s33537b|33537|file|local|vector|||3.765|package ‘ggrepel’ was built under R version 4.4.1|
+sdd_harmonization_report|stem|ffb71af2b98039b3|826bc64bc8f6544a|9485216a05e866a7|1382502045|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/06_sdd_harmonization.Rmd|t20305.9318533441s|s25408b|25408|file|local|vector|||3.914||
+chla_harmonization_report|stem|2ee3d7b8a91c8991|34b41fe0ee9b1ff0|b4de44026ea09550|2144116569|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/04_chla_harmonization.Rmd|t20305.9318957415s|s25814b|25814|file|local|vector|||3.582||
+download_report|stem|b5a1db438e4773aa|c9fc6c63c2967592|51d1a1f9281e64d5|2112945246|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/02_download.Rmd|t20305.932072736s|s11384b|11384|file|local|vector|||14.401|package ‘sf’ was built under R version 4.4.1. package ‘tigris’ was built under R version 4.4.1|
+doc_harmonization_report|stem|515e04b22bacbd01|ee4aa149415df5a2|f723977294130d17|-160413784|/Users/mbrousil/Documents/AquaMatch_documentation/chapters/05_doc_harmonization.Rmd|t20305.9321172025s|s26557b|26557|file|local|vector|||3.703||
+book|stem|90bbf702a6c1e097|2ca95ac34fb3e4a9|41e5d534a699cda2|-13728362||t20305.9324645379s|s111b|111|rds|local|vector|||29.878||

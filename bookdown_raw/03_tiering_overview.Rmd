@@ -1,0 +1,95 @@
+---
+output:
+  github_document:
+    html_preview: false
+always_allow_html: true
+---
+# Tiering, flagging, and quality control philosophy 
+
+The variety of data providers, parameters, and methods in the WQP inevitably results in a heterogenous dataset that requires rigorous quality control before analytical use. In this chapter, we detail the general tiering, flagging, and quality control philosophy we apply across all parameter groups.
+
+## Handling `NA` values
+Columns related directly to the interoperability of data in the WQP, specifically field and lab methodology and depth-related columns, often contain many `NA`s in part due to inconsistent entry across data providers. A highly restrictive filtering of the WQP that requires completed data fields would result in very limited data, in part, due to the prevalence of these `NA` values. Therefore, we built this pipeline to resolve as many `NA`s as possible, but to also include `NA`s within an "inclusive" data tier if all columns of interest are not resolvable. Specifically, we retain `NA` values if removing those `NA` records would drop 10% or more of the available data for a parameter.
+
+## Heterogenous data
+In addition to `NA` values, WQP entries can be heterogenous for reasons such as:
+
++ Having a variety of analytical methods with different levels of precision and accuracy that are used to quantify the same parameter
++ Having a variety of sampling methods used to acquire the same parameter with varying levels of interoperability
++ Having a variety of names or descriptions that represent the same analytical or sampling method across different organizations
++ Having information relevant to assessing data reliability or method choice spread across multiple columns
+  + Containing observations with sample collection methods and analytical methods that are incompatible
+  + Having data with differing levels of meta data 
+  
+In order to control for some of this variation and provide end-users with something more readily navigable we have incorporated several tiers and flagging systems into the AquaSat v2 dataset:
+
++ **Method tiering**: Tiers indicating the veracity of data based on the method used to acquire measurements, thereby allowing for the identification of self-similar samples
++ **Field flags**: Flags typically indicating whether the sample collection method is consistent with the analytical method. When there is no analytical aspect to the parameter (e.g., secchi disk depth) this column provides additional information that may be helpful for interpretation of the value given any field comments or methodological differences in data collection reported in the WQP entry. Given these differences, flag values and their meaning may differ by parameter and as a result, flag values will be explained in the documentation for each parameter
++ **Depth flags**: Flags indicating the type of water sampling depth measurement or completeness of the measurement
++ **Miscellaneous flags**: Flags that will vary in meaning and use by parameter. Some variables will not use them
+
+### Method tiering
+The `ResultAnalyticalMethod.MethodName` column from the WQP is often the primary column we use for determining which tier each record falls within. Details on how each parameter's methods were sorted into tiers can be found in its corresponding harmonization chapter.
+
+The primary purpose of our tiering is to determine the reliability and accuracy of each analytical method across data providers and throughout time for each parameter in the AquaSat v2 dataset. We developed the following categories, which are represented in the `tier` column of the final dataset: 
+
++ **Tier 0: Restrictive.** Data that are verifiably self-similar across organizations and time-periods and can be considered highly reliable
++ **Tier 1: Narrowed.** Data that we have good reason to believe are self-similar, but for which we can't verify full compatibility across data providers
++ **Tier 2: Inclusive.** Data that are assumed to be reliable and are harmonized to our best ability given the information available from the data provider. This tier includes `NA` or non-resolvable descriptions for the analytical method, which often make up the majority of method descriptions for any given parameter. Because this tier represents many analytical methods, direct compatibility between samples is not guaranteed.
+
+### Field flags
+The `field_flag` column is used to check if the sample collection method (`SampleCollectionMethod.MethodName`) is reasonable (flag = 0), suspect (flag = 1), or inconclusive (flag = 2).  "Reasonable" flags mean that the sample collection or observation method and the analytical method are in harmony with one another. "Suspect" flags are assigned when the sample collection method description isn't consistent with what would be expected given the `characteristicName` and the `ResultAnalyticalMethod.MethodName` for a given record. "Inconclusive" or unknown flags are assigned to records with "inclusive" tiers because these tiers include values such as `NA`, where it's typically impossible to determine the appropriateness of a collection method for the sample record. The relationship between field flags and tiers will vary by parameter; thus, each harmonization chapter contains specific information for these different cases.
+
+### Depth flags
+There are four columns that explicitly contain depth information for a given WQP entry, all of which contain a variety of measurement units. Below is a list of the four columns and their definitions according to the [{dataRetrieval} package documentation](https://rconnect.usgs.gov/dataRetrieval/reference/readWQPqw.html).
+
+1. `ActivityDepthHeightMeasure.MeasureValue`: "A measurement of the vertical location (measured from a reference point) at which an activity occurred."
+2. `ResultDepthHeightMeasure.MeasureValue`: "A measurement of the vertical location (measured from a reference point) at which a result occurred." *Only in STORET*
+3. `ActivityTopDepthHeightMeasure.MeasureValue`: "A measurement of the upper vertical location of a vertical location range (measured from a reference point) at which an activity occurred."
+4. `ActivityBottomDepthHeightMeasure.MeasureValue`: "A measurement of the lower vertical location of a vertical location range (measured from a reference point) at which an activity occurred."
+
+Each of the above columns has a corresponding column containing the [the associated unit used in measuring the item](https://rconnect.usgs.gov/dataRetrieval/reference/readWQPqw.html):
+
+1. `ActivityDepthHeightMeasure.MeasureUnitCode`
+2. `ResultDepthHeightMeasure.MeasureUnitCode`
+3. `ActivityTopDepthHeightMeasure.MeasureUnitCode`
+4. `ActivityBottomDepthHeightMeasure.MeasureUnitCode`
+
+#### Pre-processing
+Prior to assigning the `depth_flag` we complete a few pre-processing steps:
+
+1. Convert the following character values to an explicit `NA`: "NA", "999", "-999", "9999", "-9999", "-99", "99", "NaN"
+2. Convert depths in all four columns to meters from the depth unit listed by the data provider
+3. Create a single "discrete" sample depth column using a combination of the `ActivityDepthHeightMeasure.MeasureValue` and `ResultDepthHeightMeasure.MeasureValue` columns. We use `ActivityDepth` value when `ResultDepth` value is missing, and `ResultDepth` when `ActivityDepth` is missing. If both columns have values but disagree we use an average of the two. 
+
+This pre-processing results in three "harmonized" columns reporting water sampling depth values in meters: `harmonized_discrete_depth_value`, `harmonized_top_depth_value`, `harmonized_bottom_depth_value`. 
+
+Sample depth flags are assigned using the harmonized depth columns that result from the pre-processing steps above. If the record has no depth listed it is assigned a `depth_flag` of 0. A record with only discrete depth listed in the `harmonized_discrete_depth_value` is given a `depth_flag` of 1. A record with top and/or bottom depth (`harmonized_top_depth_value`, `harmonized_bottom_depth_value`), indicating an depth-integrated sample, is assigned a `depth_flag` of 2, and any combination of discrete + top and/or bottom depths is assigned a `depth_flag` of 3, since the sample depth(s) cannot be reconciled with certainty. 
+
+### Miscellaneous flags
+The `misc_flag` column is included as a flexible flag column in order to note important information that isn't covered by the tiering and flags defined above. Some parameters, like chlorophyll *a*, will not use this column at all and will therefore just contain `NA` values in places of flags. Values and their meaning will differ by parameter and as a result, flag values will be explained in the documentation for each parameter.
+
+### Time and date handling
+Time and date data are provided inconsistently in the WQP, so we have a standardized process for harmonizing these data to provide AquaSat users a consistent date-time column across all parameters.
+
+We have designed a function, `fill_date_time()`, to create harmonized date and time columns before the broader data harmonization process. It adds the columns `harmonized_tz` (time zone as GMT offset), `harmonized_local_time` (local date time relative to GMT offset), and `harmonized_utc` (date time reported as time in UTC) to the dataset. The function first transforms site-specific data into a unified geographic coordinate reference system and then looks up the local time zone for each monitoring site in the dataset using latitude and longitude with the `lutz::tz_lookup()` function. This spatially-acquired time zone data is temporarily stored in the `fetched_tz` column. The `harmonized_tz` column is then generated using any timezones provided in `ActivityStartTime.TimeZoneCode`, while filling in gaps in timezone data with those identified using `fetched_tz`.
+
+We then create the `harmonized_local_time` column by combining `ActivityStartDate` and `ActivityStartTime.Time`. If `ActivityStartTime.Time` is `NA` or `"00:00:00"` we instead use `"11:59:59"` in `harmonized_local_time`. Very few, if any, records contain this exact time stamp, so it can be used as a proxy to filter or flag "synthetic" sampling times if desired by the end user. Note that when we insert `"11:59:59"` **and** the  `ActivityStartTime.TimeZoneCode` was provided in UTC or GMT we treat `"11:59:59"` as **local** time and use `fetched_tz` for `harmonized_tz`. But if the `ActivityStartTime.Time` was not "synthetic" we convert the UTC/GMT-based time into the local time determined by `fetched_tz`.
+
+At this point the `harmonized_utc` column is created by converting the contents of `harmonized_local_time` to UTC. Next, the `harmonized_tz` column needs one final conversion: Up to this point its contents have been a mix of location-based strings like `"America/Chicago"` or short codes like `"CST"`. We translate both formats into a unified GMT offset format where, e.g., `"CDT"` would be `"Etc/GMT+5"` and `"CST"` would be `"Etc/GMT+6"`. Lastly, `harmonized_local_time` is formatted as a string with no time zone stamp. 
+
+Note: `ActivityStartDateTime` is a UTC datetime column that is [added by the {dataRetrieval} package](https://github.com/DOI-USGS/dataRetrieval/pull/319#issuecomment-280501805). In most, but not all, cases it will agree with `harmonized_utc`. Differences in some values occur because 1) `ActivityStartDateTime` is `NA` for `ActivityStartTime.TimeZoneCode` values of `NA`, `"AST"`, `"ADT"`, `"GST"`, `"IDLE"`; or 2) we handle `"00:00:00"` values of `ActivityStartTime.Time` the same as `NA`s whereas `ActivityStartDateTime` does not.
+
+### Anonymization
+Occasionally, personally identifiable information is included in comment fields in the WQP. We use a function, `anonymize_text()`, to find and obscure phone numbers and email addresses. By default this is applied to the `ActivityCommentText`, `ResultLaboratoryCommentText`, and `ResultCommentText` columns and occurs after downloading the initial raw WQP data.
+
+### General notes
+1. For the sake of efficiency, we do not typically add methods, tier, or flagging classifications to categories that make up less than 1% of the observations in a column.
+
+2. When building the `tier` and `_flag` columns we use temporary columns with `_tag` in the name to track important qualities that inform our tier and flag decisions. These columns are not exported to the final product and are intended as open-ended tools for tracking records, so they will vary greatly between each parameter's codebase.
+
+## Simultaneous records
+The WQP contains records that can be considered true duplicates and others where multiple non-identical measurements are recorded at the same time, place, and depth by the same organization. We deal with these within each parameter's harmonization step by taking the mean value from simultaneous observations. (See the "Aggregate simultaneous records" section of each parameter's bookdown chapter for specifics). We also report the coefficient of variation and the total number of entries contributing to the mean in the `harmonized_value_cv` and `harmonized_row_count` columns of the final dataset.
+
+This record aggregation is dealt with separately for each parameter so that specific accommodations can be made based on their tiering and value cleaning processes. Additionally, this step also requires us to group the dataset by a subset of its original columns, necessarily resulting in a reduced subset of columns in the final data product. To aid in back-joining for advanced AquaSat users, we provide a `subgroup_id` column identifying the grouping used to create the aggregated mean and coefficient of variation values. The `subgroup_id` is also present in an upstream, pre-aggregated dataset version that contains all records prior to aggregation and the original WQP columns along with the columns created in the harmonization steps. The upstream, pre-aggregated dataset is the `p3_chla_preagg_grouped` pipeline target.
+
