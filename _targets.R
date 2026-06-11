@@ -85,6 +85,16 @@ config_targets <- list(
     cue = tar_cue("always")
   ),
   
+  tar_target(
+    name = p2_cdom_drive_ids,
+    command = tribble(
+      ~name, ~id,
+      "p1_wqp_params_cdom_20251211.rds", "1yrt-koyMHOI1h4bjCHdxel2JK4PnTPh8",
+      "p2_site_counts_cdom_20251211.rds", "1z0tNj5Yx4HIYo4RnxJtVUWCu6b2oW4j6",
+      "p3_documented_drops_cdom_20251211.rds", "1075OOxduJIcikKPgJRRxkSD6a6ztaAce"
+    ),
+    cue = tar_cue("always")
+  ),
   
   # AOI grid
   tar_target(
@@ -144,6 +154,16 @@ config_targets <- list(
     packages = c("tidyverse", "googledrive")
   ),  
   
+  # CDOM
+  tar_target(
+    name = p1_wqp_params_cdom,
+    command = retrieve_data(target = "p1_wqp_params_cdom",
+                            id_df = p2_cdom_drive_ids,
+                            local_folder = "in/cdom",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$cdom_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),  
   
   # Site counts
   # Chl
@@ -187,6 +207,17 @@ config_targets <- list(
                             local_folder = "in/tss",
                             google_email = p0_harmonization_config$google_email,
                             stable_date = p0_harmonization_config$tss_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),
+  
+  # CDOM
+  tar_target(
+    name = p2_site_counts_cdom,
+    command = retrieve_data(target = "p2_site_counts_cdom",
+                            id_df = p2_cdom_drive_ids,
+                            local_folder = "in/cdom",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$cdom_stable_date),
     packages = c("tidyverse", "googledrive")
   ),
   
@@ -235,6 +266,17 @@ config_targets <- list(
     packages = c("tidyverse", "googledrive")
   ),
   
+  # CDOM
+  tar_target(
+    name = p3_documented_drops_cdom,
+    command = retrieve_data(target = "p3_documented_drops_cdom",
+                            id_df = p2_cdom_drive_ids,
+                            local_folder = "in/cdom",
+                            google_email = p0_harmonization_config$google_email,
+                            stable_date = p0_harmonization_config$cdom_stable_date),
+    packages = c("tidyverse", "googledrive")
+  ),
+  
   # Unit tables
   # Chla
   tar_file_read(
@@ -266,7 +308,40 @@ config_targets <- list(
     command = "in/tss/tss_unit_table.csv",
     cue = tar_cue("always"),
     read = read_csv(file = !!.x)
+  ),
+  
+  # CDOM
+  tar_file_read(
+    name = cdom_unit_table,
+    command = "in/cdom/cdom_unit_table.csv",
+    cue = tar_cue("always"),
+    read = read_csv(file = !!.x)
+  ),
+  
+  # Some misc. needs specific to CDOM
+  # Tiering record
+  tar_file_read(
+    name = cdom_tiering_record,
+    command = "in/cdom/cdom_tiering_record.csv",
+    cue = tar_cue("always"),
+    read = read_csv(file = !!.x)
+  ),
+  
+  tar_file_read(
+    name = cdom_param_drop_record,
+    command = "in/cdom/cdom_param_drop_record.csv",
+    cue = tar_cue("always"),
+    read = read_csv(file = !!.x)
+  ), 
+  
+  tar_file_read(
+    name = cdom_misc_flag_table,
+    command = "in/cdom/cdom_misc_flag_table.csv",
+    cue = tar_cue("always"),
+    read = read_csv(file = !!.x)
   )
+  
+  
 )
 
 # Full targets list

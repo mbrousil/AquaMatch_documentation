@@ -307,122 +307,211 @@ records. We create the following conversion table, which is used to
 translate units provided in WQP into mg per liter (mg/L):
 
 <table class=" lightable-paper table" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto; width: auto !important; margin-left: auto; margin-right: auto;">
+
 <thead>
+
 <tr>
+
 <th style="text-align:left;">
+
 ResultMeasure.MeasureUnitCode
 </th>
+
 <th style="text-align:right;">
+
 conversion
 </th>
+
 </tr>
+
 </thead>
+
 <tbody>
+
 <tr>
+
 <td style="text-align:left;">
+
 mg/L
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+00
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 mg/l
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+00
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ppm
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+00
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ug/l
 </td>
+
 <td style="text-align:right;">
+
 1.00000e-03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ug/L
 </td>
+
 <td style="text-align:right;">
+
 1.00000e-03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 mg/m3
 </td>
+
 <td style="text-align:right;">
+
 1.00000e-03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ppb
 </td>
+
 <td style="text-align:right;">
+
 1.00000e-03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 mg/cm3
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ug/ml
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+00
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ug/mL
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+00
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 mg/ml
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 ppt
 </td>
+
 <td style="text-align:right;">
+
 1.00000e+03
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 umol/L
 </td>
+
 <td style="text-align:right;">
+
 1.20107e-02
 </td>
+
 </tr>
+
 </tbody>
+
 </table>
 
 <br>
@@ -521,11 +610,11 @@ flagging, and quality control philosophy*. These tiers are:
 
 <!-- Table created with https://www.tablesgenerator.com/markdown_tables -->
 
-| Tier | Name        | Description                                                                                                                                                                                                                                                                                            | DOC details                                                                                                                                            |     |
-|------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-----|
-| 0    | Restrictive | Data that are verifiably self-similar across organizations and time-periods and can be considered highly reliable and interoperable                                                                                                                                                                    | Includes records using Wet Oxidation+Persulfate+IR (EPA 415.3, SM 5310D) or Persulfate-UV/Heated Persulfate Oxidation+IR (EPA 415.2, SM 5310C) methods |     |
-| 1    | Narrowed    | Data that we have good reason to believe are self-similar, but for which we can’t verify full interoperability across data providers                                                                                                                                                                   | Includes records using combustion+IR (EPA 415.1, SM 5310B) or elemental analyzer methods (EPA 440)                                                     |     |
-| 2    | Inclusive   | Data that are assumed to be reliable and are harmonized to our best ability given the information available from the data provider. This tier includes `NA` or non-resolvable descriptions for the analytical method, which often make up the majority of methods descriptions for any given parameter | Carbonaceous (EPA 9060A) and all other records by default, including `NA` methods                                                                      |     |
+| Tier | Name | Description | DOC details |  |
+|----|----|----|----|----|
+| 0 | Restrictive | Data that are verifiably self-similar across organizations and time-periods and can be considered highly reliable and interoperable | Includes records using Wet Oxidation+Persulfate+IR (EPA 415.3, SM 5310D) or Persulfate-UV/Heated Persulfate Oxidation+IR (EPA 415.2, SM 5310C) methods |  |
+| 1 | Narrowed | Data that we have good reason to believe are self-similar, but for which we can’t verify full interoperability across data providers | Includes records using combustion+IR (EPA 415.1, SM 5310B) or elemental analyzer methods (EPA 440) |  |
+| 2 | Inclusive | Data that are assumed to be reliable and are harmonized to our best ability given the information available from the data provider. This tier includes `NA` or non-resolvable descriptions for the analytical method, which often make up the majority of methods descriptions for any given parameter | Carbonaceous (EPA 9060A) and all other records by default, including `NA` methods |  |
 
 <br>
 

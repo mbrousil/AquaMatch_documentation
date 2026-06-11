@@ -1,0 +1,9238 @@
+
+<!-- Image settings -->
+
+# CDOM harmonization process
+
+Following the completion of the {dataRetrieval} download process
+described previously, the pipeline contains raw WQP data for each
+parameter of interest. Before we harmonize each parameter we run through
+a series of universal “pre-harmonization” steps, which ensure that the
+datasets are appropriately formatted when entering their harmonization
+routines.
+
+The text below first walks through the pre-harmonization steps for the
+colored dissolved organic matter (CDOM) dataset and then delves into the
+specifics of the harmonization process.
+
+## Pre-harmonization of the raw CDOM WQP dataset
+
+At the start of the pre-harmonization process the raw CDOM WQP dataset
+contains 186.4 thousand rows.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-4-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Missing results
+
+Next, records that have missing data are dropped from the dataset.
+Several criteria are used when checking for missing data. If any of the
+below criteria are met the row is flagged as missing:
+
+1.  Both the result column and detection limit column had `NA` data
+2.  Result, result unit, activity comment, laboratory comment, and
+    result comment columns are all `NA`
+3.  The result comment column contains any user-provided text indicating
+    a missing value. This currently includes: `analysis lost`,
+    `not analyzed`, `not recorded`, `not collected`, or
+    `no measurement taken`
+
+473 rows are dropped, resulting in a final count of 185.9 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-6-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Filter status
+
+The final step in pre-harmonization is to filter the
+`ResultStatusIdentifier` column to include only the following statuses:
+
+- `"Accepted"`
+- `"Final"`
+- `"Historical"`
+- `"Validated"`
+- `"Preliminary"`
+- `NA`
+
+These statuses generally indicate a reliable result was obtained,
+however we also include `NA` in an effort to be conservative. More
+specifically, when making decisions for this and other columns we
+occasionally retain `NA` values if removing the records would otherwise
+drop 10% or more of the available data.
+
+This step removes 0 rows of data, leaving it with 185.9 thousand rows
+remaining.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-8-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+## Harmonization-ready CDOM dataset
+
+Once ready for harmonization, the CDOM WQP dataset contains the
+following user-defined `CharacteristicNames`: Absorbance at 280
+nanometers, Absorbance at 280 nm, Absorbance at 370 nanometers,
+Absorbance at 412 nm, Absorbance at 440 nm, Absorption coefficient at
+440 nm, Absorption spectral slope (Sag), Colored dissolved organic
+matter (CDOM), Emission intensity ratio, Fluorescence index,
+Fluorescence, excitation 260 emission 450, Fluorescence, excitation 275
+emission 304, Fluorescence, excitation 275 emission 340, Fluorescence,
+excitation 280 emission 370, Fluorescence, excitation 300 emission 390,
+Fluorescence, excitation 340 emission 440, Fluorescence, excitation 370
+emission 460, Fluorescence, excitation 390 emission 510, Fluorescence,
+excitation 420 emission 460, Specific UV Absorbance at 254 nm, Specific
+UV Absorbance at 254 nm, corrected for Fe, UV 254, UV Absorption,
+relative conc. of organic constituents.
+
+<img src="in/cdom/cdom_stacked_char_names.png" alt="Stacked bar chart with counts of CharacteristicName records" width="650"/>
+
+These `CharacteristicNames` are chosen in order to select for only those
+measurements that pertain to CDOM. We selected them by reviewing options
+in the `Characteristics` field of the [Water Quality Portal Filter
+Results](https://www.waterqualitydata.us/#advanced=true) page.
+
+<br>
+
+### Filter media and fractions, categorize parameters
+
+We next ensure that the media type for all CDOM data is
+`"Surface Water"`, `"Water"`, `"Estuary"`, or `NA`. Any records not
+meeting these criteria are dropped.
+
+We then assign each record to one of the `parameter` values in the table
+below, based on its values for `CharacteristicName`,
+`ResultAnalyticalMethod.MethodName`, and
+`ResultMeasure.MeasureUnitCode`. This helps us to group comparable
+measurements throughout the rest of the process and generally simplify
+the way the dataset is organized:
+
+<br>
+
+<!-- Table created with https://www.tablesgenerator.com/markdown_tables -->
+
+| Parameter | Definition |
+|----|----|
+| Absorbance at 254 nm | `CharacteristicName` is either “Specific UV Absorbance at 254 nm” or “UV 254” and `ResultMeasure.MeasureUnitCode` is **not** “L/mg-cm” or “L/mgDOC\*m”. Alternatively, `CharacteristicName` is “UV Absorption, relative conc. of organic constituents” and `ResultAnalyticalMethod.MethodIdentifier` is “5910-B” |
+| Absorbance at 280 nm | `CharacteristicName` is “Absorbance at 280 nanometers” |
+| Absorbance at 370 nm | `CharacteristicName` is “Absorbance at 370 nanometers” |
+| Absorbance at 412 nm | `CharacteristicName` is “Absorbance at 412 nm” |
+| Absorbance at 440 nm | `CharacteristicName` is “Absorption coefficient at 440 nm” OR “Absorbance at 440 nm” OR `CharacteristicName` is “Colored dissolved organic matter (CDOM)” and `ResultAnalyticalMethod.MethodName` is “CDOM absorption (440nm)” |
+| Absorption spectral slope, 275 to 295 nm | `CharacteristicName` is “Absorption spectral slope (Sag)” and `USGSPCode` is 32300 |
+| Absorption spectral slope, 290 to 350 nm | `CharacteristicName` is “Absorption spectral slope (Sag)” and `USGSPCode` is 32301 |
+| Absorption spectral slope, 350 to 400 nm | `CharacteristicName` is “Absorption spectral slope (Sag)” and `USGSPCode` is 32302 |
+| Absorption spectral slope, 400 to 500 nm | `ResultAnalyticalMethod.MethodName` is “Slope Of CDOM Absorption Coefficient Spectrum (400 To 500 Nm)” and `StatisticalBaseCode` is “Slope” |
+| Absorption spectral slope, 412 to 600 nm | `CharacteristicName` is “Absorption spectral slope (Sag)” and `USGSPCode` is 32331 |
+| Absorption spectral slope, 412 to 676 nm | `CharacteristicName` is “Absorption spectral slope (Sag)” and `USGSPCode` is 32303 |
+| FDOM | `CharacteristicName` is “Colored dissolved organic matter (CDOM)” AND `ResultAnalyticalMethod.MethodName` is NA or mentions a fluorometer AND `ResultMeasure.MeasureUnitCode` is one of “RFU”, “ug/l QSE”, “mg/l”, or “ug/L”. Alternatively, `CharacteristicName` is formatted like “Fluorescence, excitation 275 emission 304” but exact numbers will vary. |
+| Fluorescence Index | `CharacteristicName` is “Fluorescence index” |
+| SUVA | `ResultMeasure.MeasureUnitCode` is “L/mg-cm” or “L/mgDOC\*m” OR `CharacteristicName` is “UV Absorption, relative conc. of organic constituents” and `ResultAnalyticalMethod.MethodIdentifier` is “415.3” |
+
+<br>
+
+Records that do not meet the criteria of one of the `parameter` entries
+above are dropped (n = 1,113). A summary of the types of dropped records
+and their row counts is below:
+
+``` r
+param_drop_record %>%
+kable() %>%
+  kable_paper() %>%
+  scroll_box(width = "750px", height = "500px")
+```
+
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:750px; ">
+
+<table class=" lightable-paper" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+CharacteristicName
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultAnalyticalMethod.MethodName
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+USGSPCode
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultAnalyticalMethod.MethodIdentifier
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultAnalyticalMethod.MethodIdentifierContext
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultMeasure.MeasureUnitCode
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultSampleFractionText
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+n
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+9222 B ~ Standard Total Coliform Membrane Filter Procedure
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+9222B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+ug/L
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+7
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+CHROMOPHORIC DISSOLVED ORGANIC MATTER
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NASA-CDOM
+</td>
+
+<td style="text-align:left;">
+
+21VASWCB
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+839
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NASA/TM-2003-211621/Rev4-Vol.IV
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NASA/TM-2003-211621
+</td>
+
+<td style="text-align:left;">
+
+RTI
+</td>
+
+<td style="text-align:left;">
+
+m
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+96
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32295
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32322
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+m
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+130
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Emission intensity ratio
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32347
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+5
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+UV Absorption, relative conc. of organic constituents
+</td>
+
+<td style="text-align:left;">
+
+UNKNOWN
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+UNKNOWN
+</td>
+
+<td style="text-align:left;">
+
+AZDEQ_SW
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+32
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<br>
+
+Below is a stacked barplot of the dataset organized by the new
+`parameter` column:
+
+<img src="in/cdom/cdom_stacked_param_names.png" alt="Stacked bar chart with counts of parameter records" width="650"/>
+
+1.4 thousand rows are removed. The final row count after this is 184.6
+thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-11-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Document and remove fails
+
+In this step we filter out records based on indications that they have
+failed data quality assurance or quality control for some reason given
+by the data provider (these instances are referred to here as
+“failures”).
+
+After reviewing the contents of the `ActivityCommentText`,
+`ResultLaboratoryCommentText`, `ResultCommentText`,
+`ResultDetectionConditionText`, and `ResultMeasureValue_original`
+columns, we developed a list of terms that captured the majority of
+instances where records had failures or unacceptable measurements.
+(Note: `ResultMeasureValue_original` is a duplicate, character version
+of the `ResultMeasureValue` column that we use as a reference for the
+column’s contents before it was converted to a numeric type.) We found
+the phrasing to be consistent across columns, so we searched for the
+same (case agnostic) text in all four locations. The terms are: “beyond
+accept”, “cancelled”, “contaminat”, “error”, “fail”, “improper”,
+“interference”, “invalid”, “no result”, “no test”, “not accept”,
+“outside of accept”, “problem”, “questionable”, “suspect”, “unable”,
+“violation”, “reject”, “no data”, “time exceed”, “value extrapolated”,
+“exceeds”, “biased”, “parameter not required”, “not visited”, “warm”,
+“broken”.
+
+Below are pie charts that break down the number of failure detections by
+column. **Note that the plotting below is automated so if one or more of
+the columns listed above are not plotted, this indicates that the
+column(s) did not return any matches for the failure phrases.** Also
+note that a single record can contain multiple failure phrases;
+therefore, failure phrases are not mutually exclusive.
+
+<br>
+
+#### ActivityCommentText fail detects
+
+<img src="in/cdom/cdom_ActivityCommentText_fail_pie.png" alt="ActivityCommentText failure detects" width="650"/>
+
+#### ResultCommentText fail detects
+
+<img src="in/cdom/cdom_ResultCommentText_fail_pie.png" alt="ResultCommentText failure detects" width="650"/>
+
+#### ResultLaboratoryCommentText fail detects
+
+<img src="in/cdom/cdom_ResultLaboratoryCommentText_fail_pie.png" alt="ResultLaboratoryCommentText failure detects" width="650"/>
+
+<br>
+
+#### ResultDetectionConditionText fail detects
+
+<img src="in/cdom/cdom_ResultDetectionConditionText_fail_pie.png" alt="ResultDetectionConditionText failure detects" width="650"/>
+
+#### ResultMeasureValue_original fail detects
+
+<img src="in/cdom/cdom_ResultMeasureValue_original_fail_pie.png" alt="ResultMeasureValue_original failure detects" width="650"/>
+
+<br>
+
+8806 rows are removed after detecting failure-related phrases and 175.7
+thousand rows remain.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-13-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Clean MDLs
+
+In this step method detection limits (MDLs) are used to clean up the
+reported values. When a numeric value is missing for the data record
+(i.e., `NA` or text that became `NA` during an `as.numeric` call) we
+check for non-detect language in the `ResultLaboratoryCommentText`,
+`ResultCommentText`, `ResultDetectionConditionText`, and
+`ResultMeasureValue` columns. This language can be `"non-detect"`,
+`"not detect"`, `"non detect"`, `"undetect"`, or `"below"`.
+
+If non-detect language exists then we use the
+`DetectionQuantitationLimitMeasure.MeasureValue` column for the MDL.
+Otherwise if there is a `<` and a number in the `ResultMeasureValue`
+column, we use that number instead.
+
+We then use a random number between 0 and `0.5 * MDL` as the record’s
+value moving forward.
+
+We produce a new column, `mdl_flag`, from the MDL cleaning process.
+Records where no MDL-based adjustment was made and which are at or above
+the MDL are assigned a 0. Records with corrected values based on the MDL
+method are assigned a 1. Finally, records where no MDL-based adjustment
+was made and which contain a numeric value below the provided MDL are
+assigned a 2.
+
+This should not result in a change in rows, but we still check: 0 rows
+are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-15-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Clean approximate values
+
+Cleaning approximate values involves a similar process as for MDL
+cleaning. We flag “approximated” values in the dataset. The
+`ResultMeasureValue` column gets checked for **all** three of the
+following conditions:
+
+1.  Numeric-only version of the column is still `NA` after MDL cleaning
+2.  The original column text contained a number
+3.  Any of `ResultLaboratoryCommentText`, `ResultCommentText`, or
+    `ResultDetectionConditionText` match this regular expression,
+    ignoring case: `"result approx|RESULT IS APPROX|value approx"`
+
+We then use the approximate value as the record’s value moving forward.
+
+Records with corrected values based on the above method are noted with a
+1 in the `approx_flag` column. Note, however, that occasionally
+approximate language will be used in a record but not changed or
+flagged. This occurs when the language is used in a comment-related
+column and **not** the result column itself, meaning that there is a
+usable numeric value provided (and thus doesn’t need correction).
+
+This should not result in a change in rows, but we still check: 0 rows
+are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-17-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Clean values with “greater than” data
+
+The next step is similar to the MDL and approximate value cleaning
+processes, and follows the approximate cleaning process most closely.
+The goal is to clean up values that were entered as “greater than” some
+value. The `ResultMeasureValue` column gets checked for **all** three of
+the following conditions:
+
+1.  Numeric-only version of the column is still `NA` after MDL &
+    approximate cleaning
+2.  The original column text contained a number
+3.  The original column text contained a `>`
+
+We then use the “greater than” value (without `>`) as the record’s value
+moving forward.
+
+Records with corrected values based on the above method are noted with a
+1 in the `greater_flag` column.
+
+This should not result in a change in rows, but we still check: 0 rows
+are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-19-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Drop unresolved NA measurements
+
+The goal of the preceding three steps was to prevent records with
+seemingly missing measurement data from being dropped if there was still
+a chance of recovering a usable value. At this point we’ve finished with
+that process and we proceed to check for remaining records with `NA`
+values in their `harmonized_value` column. If they exist, they are
+dropped. We also filter out any negative values in the dataset at this
+point because CDOM cannot be negative. The exception to this is for the
+“Absorption spectral slope” parameters, which we take the absolute value
+of instead of removing.
+
+6 rows are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-21-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Harmonize record units
+
+The next step in CDOM harmonization is converting the units of WQP
+records. Records that don’t make sense for CDOM or can’t be converted to
+a standardized unit dropped. We standardize units to “AU/m” unless the
+`parameter` is “SUVA” (“L/mgDOC\*m”), “FDOM” (“RFU”, “RU”, “ug/l QSE”),
+“Fluorescence index” (“None”), or one of the “Absorption spectral slope”
+variants (“nm-1”). We use the unit conversion table below for this.
+
+<table class=" lightable-paper table" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto; width: auto !important; margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+ResultMeasure.MeasureUnitCode
+</th>
+
+<th style="text-align:left;">
+
+conversion
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+AU/cm
+</td>
+
+<td style="text-align:left;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+\#/cm
+</td>
+
+<td style="text-align:left;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+cm
+</td>
+
+<td style="text-align:left;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+nm
+</td>
+
+<td style="text-align:left;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+m
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+L/mg-cm
+</td>
+
+<td style="text-align:left;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+mg/l
+</td>
+
+<td style="text-align:left;">
+
+1000
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+ug/L
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+RFU
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+per m
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:left;">
+
+1
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<br>
+
+**Note** that in the table above “nm” units are given a conversion
+factor of 100. This is because we assessed that these records are likely
+intended to use cm-1 units. For example: The
+`DetectionQuantitationLimitMeasure.MeasureUnitCode` for these records is
+“units/cm”, their measured values fall within expected ranges for
+natural waters for absorbance at 254 nm reported in cm-1 units, and the
+detection limit listed as 0.005 also aligns with cm-1 measurements.
+**Additionally** the table lists “None” with a conversion factor of 1,
+which allows it to be retained as-is for records with the “Fluorescence
+index” parameter. Records with parameter variants of “Absorption
+spectral slope” are often provided in the WQP with units of “None” as
+well, but we convert these to “nm-1” in this step.
+
+<br>
+
+Below is a pie chart that breaks down the different unit codes that were
+dropped in the unit harmonization process, and how many records were
+lost with each code. **(Note that if there is no pie chart below that is
+because no unit codes were dropped).**
+
+<br>
+
+<img src="in/cdom/cdom_unit_drop_pie.png" alt="ResultMeasure.MeasureUnitCode mismatched codes" width="650"/>
+
+<br>
+
+0 rows are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-24-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Clean depth data
+
+The next harmonization step cleans the four depth-related columns
+obtained from the WQP. The details behind this step are covered in the
+*Depth flags* section of the *Tiering, flagging, and quality control
+philosophy* chapter.
+
+This should not result in a change in rows, but we still check: 0 rows
+are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-26-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Filter and tier methods
+
+We next review information related to the analytical methods, sample
+fraction, and result units for each record to construct hierarchical
+tiers as described in the *Method tiering* section of the *Tiering,
+flagging, and quality control philosophy* chapter.
+
+In preparation for tiering, we check the
+`ResultAnalyticalMethod.MethodName` column for names that indicate
+non-CDOM measurements.
+
+Finally, we group the data into three tiers as described in *Tiering,
+flagging, and quality control philosophy*. Broadly, these tiers are:
+
+<br>
+
+<!-- Table created with https://www.tablesgenerator.com/markdown_tables -->
+
+| Tier | Name | Description | CDOM Details |
+|----|----|----|----|
+| 0 | Restrictive | Data that are verifiably self-similar across organizations and time-periods and can be considered highly reliable and interoperable | Has appropriate (and consistent) information in `CharacteristicName`, methods columns, and `ResultMeasure.MeasureUnitCode`. `ResultSampleFractionText` is filtered |
+| 1 | Narrowed | Data that we have good reason to believe are self-similar, but for which we can’t verify full interoperability across data providers | There is a mismatch in information, e.g., between the methods columns |
+| 2 | Inclusive | Data that are assumed to be reliable and are harmonized to our best ability given the information available from the data provider. This tier includes NA or non-resolvable descriptions for the analytical method, which often make up the majority of methods descriptions for any given parameter | `ResultSampleFractionText` is reported as total or important information is missing from one or more relevant columns |
+
+<br>
+
+At this point we create a file (`in/cdom/cdom_tiering_record.csv`) that
+contains a record of how specific method text was tiered and how many
+row counts corresponded to each method. This file is also included as an
+interactive HTML table below, in order to illustrate how the specifics
+of each tiering decision in the table above are carried out.
+
+``` r
+tiering_record %>%
+kable() %>%
+  kable_paper() %>%
+  scroll_box(width = "750px", height = "500px")
+```
+
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:750px; ">
+
+<table class=" lightable-paper" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+parameter
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+CharacteristicName
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultAnalyticalMethod.MethodName
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+USGSPCode
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultAnalyticalMethod.MethodIdentifier
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultAnalyticalMethod.MethodIdentifierContext
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultMeasure.MeasureUnitCode
+</th>
+
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+
+ResultSampleFractionText
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+tier
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+min_value
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+max_value
+</th>
+
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+
+n
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Computation by NWIS algorithm
+</td>
+
+<td style="text-align:right;">
+
+63162
+</td>
+
+<td style="text-align:left;">
+
+ALGOR
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+1.980000e+02
+</td>
+
+<td style="text-align:right;">
+
+37767
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm, Supor (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV006
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.7000000
+</td>
+
+<td style="text-align:right;">
+
+1.260000e+02
+</td>
+
+<td style="text-align:right;">
+
+12301
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm, GFF (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV005
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1.0000000
+</td>
+
+<td style="text-align:right;">
+
+6.320000e+02
+</td>
+
+<td style="text-align:right;">
+
+12301
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 280 nm, Supor (annon)
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+UV002
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.2000000
+</td>
+
+<td style="text-align:right;">
+
+9.810000e+01
+</td>
+
+<td style="text-align:right;">
+
+12272
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 280 nm, GFF (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+UV007
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.7000000
+</td>
+
+<td style="text-align:right;">
+
+4.950000e+02
+</td>
+
+<td style="text-align:right;">
+
+12221
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, wf, 254 nm
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV008
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+1.905000e+02
+</td>
+
+<td style="text-align:right;">
+
+6856
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm,GFF (USGS-NYL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV019
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.3000000
+</td>
+
+<td style="text-align:right;">
+
+1.680000e+02
+</td>
+
+<td style="text-align:right;">
+
+5991
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.140000e+02
+</td>
+
+<td style="text-align:right;">
+
+4980
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+SUVA, wf, calculation
+</td>
+
+<td style="text-align:right;">
+
+63162
+</td>
+
+<td style="text-align:left;">
+
+UV003
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.1000000
+</td>
+
+<td style="text-align:right;">
+
+1.000000e+01
+</td>
+
+<td style="text-align:right;">
+
+4759
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 275 to 295 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32300
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0077000
+</td>
+
+<td style="text-align:right;">
+
+2.840000e-02
+</td>
+
+<td style="text-align:right;">
+
+2680
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32296
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+AU/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0700000
+</td>
+
+<td style="text-align:right;">
+
+1.135000e+02
+</td>
+
+<td style="text-align:right;">
+
+2678
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nanometers
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32297
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+AU/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.369000e+01
+</td>
+
+<td style="text-align:right;">
+
+2676
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 290 to 350 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32301
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.770000e-02
+</td>
+
+<td style="text-align:right;">
+
+2670
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 350 to 400 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32302
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0071000
+</td>
+
+<td style="text-align:right;">
+
+4.930000e-02
+</td>
+
+<td style="text-align:right;">
+
+2662
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32299
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+AU/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0500000
+</td>
+
+<td style="text-align:right;">
+
+8.470000e+00
+</td>
+
+<td style="text-align:right;">
+
+2639
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32298
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+AU/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0500000
+</td>
+
+<td style="text-align:right;">
+
+1.094000e+01
+</td>
+
+<td style="text-align:right;">
+
+2629
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32312
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1.1340000
+</td>
+
+<td style="text-align:right;">
+
+2.171000e+00
+</td>
+
+<td style="text-align:right;">
+
+2476
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 300 emission 390
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32309
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0030000
+</td>
+
+<td style="text-align:right;">
+
+5.971000e+00
+</td>
+
+<td style="text-align:right;">
+
+2476
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 340 emission 440
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+52901
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0010000
+</td>
+
+<td style="text-align:right;">
+
+7.140000e+00
+</td>
+
+<td style="text-align:right;">
+
+2474
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 370 emission 460
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+52902
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0010000
+</td>
+
+<td style="text-align:right;">
+
+5.260000e+00
+</td>
+
+<td style="text-align:right;">
+
+2419
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 260 emission 450
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32304
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0096000
+</td>
+
+<td style="text-align:right;">
+
+1.502000e+01
+</td>
+
+<td style="text-align:right;">
+
+2379
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 390 emission 510
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32307
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0015000
+</td>
+
+<td style="text-align:right;">
+
+3.236000e+00
+</td>
+
+<td style="text-align:right;">
+
+2338
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 280 emission 370
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32310
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0117000
+</td>
+
+<td style="text-align:right;">
+
+5.096000e+00
+</td>
+
+<td style="text-align:right;">
+
+2319
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm, silver (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV004
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.1000000
+</td>
+
+<td style="text-align:right;">
+
+1.430000e+02
+</td>
+
+<td style="text-align:right;">
+
+1990
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+63162
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.3000000
+</td>
+
+<td style="text-align:right;">
+
+6.300000e+00
+</td>
+
+<td style="text-align:right;">
+
+1809
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 340
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32311
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0026000
+</td>
+
+<td style="text-align:right;">
+
+3.517000e+00
+</td>
+
+<td style="text-align:right;">
+
+1713
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 280 nm,silver (annon)
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+UV001
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.1000000
+</td>
+
+<td style="text-align:right;">
+
+9.930000e+06
+</td>
+
+<td style="text-align:right;">
+
+1697
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+Colorized Dissolved Organic Matter
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+FLUORO
+</td>
+
+<td style="text-align:left;">
+
+COEOMAHA_WQX
+</td>
+
+<td style="text-align:left;">
+
+ug/L
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+10.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.680000e+02
+</td>
+
+<td style="text-align:right;">
+
+1683
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+\#/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0008584
+</td>
+
+<td style="text-align:right;">
+
+6.520000e+01
+</td>
+
+<td style="text-align:right;">
+
+1577
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+Turner Designs Trilogy Fluorometer with CDOM specific
+excitation/emission filters for monitoring CDOM in natural waters
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+TurnerDesigns-CDOM
+</td>
+
+<td style="text-align:left;">
+
+31DELRBC_WQX
+</td>
+
+<td style="text-align:left;">
+
+RFU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+472.5600000
+</td>
+
+<td style="text-align:right;">
+
+9.261500e+03
+</td>
+
+<td style="text-align:right;">
+
+1557
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 676 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32303
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0029000
+</td>
+
+<td style="text-align:right;">
+
+2.920000e-02
+</td>
+
+<td style="text-align:right;">
+
+1509
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32295
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+3.230000e+04
+</td>
+
+<td style="text-align:right;">
+
+1449
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved Organic Matter Absorption Coefficient (Gelbstoff)
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+L01~CDOM_440
+</td>
+
+<td style="text-align:left;">
+
+CBP_WQX
+</td>
+
+<td style="text-align:left;">
+
+per m
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.1228000
+</td>
+
+<td style="text-align:right;">
+
+2.246920e+01
+</td>
+
+<td style="text-align:right;">
+
+1414
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 400 to 500 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Slope Of CDOM Absorption Coefficient Spectrum (400 To 500 Nm)
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+L01~CDOM_SLOPE
+</td>
+
+<td style="text-align:left;">
+
+CBP_WQX
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0075000
+</td>
+
+<td style="text-align:right;">
+
+2.580000e-02
+</td>
+
+<td style="text-align:right;">
+
+1414
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32322
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+RFU
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+4.060000e+03
+</td>
+
+<td style="text-align:right;">
+
+1345
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 600 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32331
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0030000
+</td>
+
+<td style="text-align:right;">
+
+1.700000e-02
+</td>
+
+<td style="text-align:right;">
+
+973
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1.6000000
+</td>
+
+<td style="text-align:right;">
+
+1.460000e+02
+</td>
+
+<td style="text-align:right;">
+
+821
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, 254 nm
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, 254 nm
+</td>
+
+<td style="text-align:left;">
+
+YRITWC
+</td>
+
+<td style="text-align:left;">
+
+L/mg-cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+1.296472e+05
+</td>
+
+<td style="text-align:right;">
+
+816
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, 254 nm
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, 254 nm
+</td>
+
+<td style="text-align:left;">
+
+YRITWC
+</td>
+
+<td style="text-align:left;">
+
+nm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+7.151227e+02
+</td>
+
+<td style="text-align:right;">
+
+770
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Gross Alpha and Beta Activity in Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+00-01
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.1000000
+</td>
+
+<td style="text-align:right;">
+
+2.130000e+01
+</td>
+
+<td style="text-align:right;">
+
+719
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 304
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32305
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0041000
+</td>
+
+<td style="text-align:right;">
+
+1.075000e+00
+</td>
+
+<td style="text-align:right;">
+
+699
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 254 nm, wf (SM5910)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV011
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+3.510000e+01
+</td>
+
+<td style="text-align:right;">
+
+634
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+YSI EXO fluorometer, 365/480 nm
+</td>
+
+<td style="text-align:right;">
+
+32295
+</td>
+
+<td style="text-align:left;">
+
+FL017
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.1000000
+</td>
+
+<td style="text-align:right;">
+
+2.117000e+02
+</td>
+
+<td style="text-align:right;">
+
+631
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1.5000000
+</td>
+
+<td style="text-align:right;">
+
+3.880000e+01
+</td>
+
+<td style="text-align:right;">
+
+400
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32289
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+mg/l
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+670.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.510000e+03
+</td>
+
+<td style="text-align:right;">
+
+385
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Determination of UV Absorbance at 440 nm in Water, by MDH modified
+method
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+MDH055
+</td>
+
+<td style="text-align:left;">
+
+MNPCA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.1000000
+</td>
+
+<td style="text-align:right;">
+
+8.150000e+00
+</td>
+
+<td style="text-align:right;">
+
+324
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorbance at 254 nm
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+UVA_UV_254
+</td>
+
+<td style="text-align:left;">
+
+11NPSWRD_WQX
+</td>
+
+<td style="text-align:left;">
+
+\#/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1.3000000
+</td>
+
+<td style="text-align:right;">
+
+1.840000e+01
+</td>
+
+<td style="text-align:right;">
+
+319
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+Turner Designs fluoro.,365/470nm
+</td>
+
+<td style="text-align:right;">
+
+32295
+</td>
+
+<td style="text-align:left;">
+
+FL013
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+37.9000000
+</td>
+
+<td style="text-align:right;">
+
+1.087000e+03
+</td>
+
+<td style="text-align:right;">
+
+207
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+2.8000000
+</td>
+
+<td style="text-align:right;">
+
+1.370000e+02
+</td>
+
+<td style="text-align:right;">
+
+194
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence Index
+</td>
+
+<td style="text-align:right;">
+
+32312
+</td>
+
+<td style="text-align:left;">
+
+ABS06
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.000000e+00
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 260 emission 450
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32304
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0480000
+</td>
+
+<td style="text-align:right;">
+
+2.452000e+00
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 340
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32311
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0120000
+</td>
+
+<td style="text-align:right;">
+
+6.921000e-01
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 280 emission 370
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32310
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0190000
+</td>
+
+<td style="text-align:right;">
+
+1.048000e+00
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 300 emission 390
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32309
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0220000
+</td>
+
+<td style="text-align:right;">
+
+1.218000e+00
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 340 emission 440
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32332
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0290000
+</td>
+
+<td style="text-align:right;">
+
+1.312000e+00
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 370 emission 460
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32333
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0200000
+</td>
+
+<td style="text-align:right;">
+
+1.105000e+00
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 390 emission 510
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32307
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0110000
+</td>
+
+<td style="text-align:right;">
+
+6.395000e-01
+</td>
+
+<td style="text-align:right;">
+
+187
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, wf, 412 nm
+</td>
+
+<td style="text-align:right;">
+
+66700
+</td>
+
+<td style="text-align:left;">
+
+UV010
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+AU/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.4000000
+</td>
+
+<td style="text-align:right;">
+
+1.570000e+01
+</td>
+
+<td style="text-align:right;">
+
+165
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+18.4000000
+</td>
+
+<td style="text-align:right;">
+
+2.930000e+02
+</td>
+
+<td style="text-align:right;">
+
+165
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32330
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+mg/l
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+120.0000000
+</td>
+
+<td style="text-align:right;">
+
+2.964000e+04
+</td>
+
+<td style="text-align:right;">
+
+154
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm, corrected for Fe
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+L/mg-cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+246.0000000
+</td>
+
+<td style="text-align:right;">
+
+4.510000e+02
+</td>
+
+<td style="text-align:right;">
+
+153
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+ug/L
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+19.0714216
+</td>
+
+<td style="text-align:right;">
+
+1.065636e+02
+</td>
+
+<td style="text-align:right;">
+
+130
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption coefficient at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+\#/cm
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.2053158
+</td>
+
+<td style="text-align:right;">
+
+1.745181e+01
+</td>
+
+<td style="text-align:right;">
+
+123
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+L/mg-cm
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1.2248924
+</td>
+
+<td style="text-align:right;">
+
+4.844491e+00
+</td>
+
+<td style="text-align:right;">
+
+123
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 420 emission 460
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32355
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0215000
+</td>
+
+<td style="text-align:right;">
+
+5.180000e-01
+</td>
+
+<td style="text-align:right;">
+
+119
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV Absorption, relative conc. of organic constituents
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+9.0800000
+</td>
+
+<td style="text-align:right;">
+
+1.460000e+02
+</td>
+
+<td style="text-align:right;">
+
+97
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0300000
+</td>
+
+<td style="text-align:right;">
+
+2.514000e+01
+</td>
+
+<td style="text-align:right;">
+
+95
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 304
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32305
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0186000
+</td>
+
+<td style="text-align:right;">
+
+2.625000e-01
+</td>
+
+<td style="text-align:right;">
+
+93
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 676 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32303
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0001329
+</td>
+
+<td style="text-align:right;">
+
+1.718640e-02
+</td>
+
+<td style="text-align:right;">
+
+85
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.3000000
+</td>
+
+<td style="text-align:right;">
+
+6.780000e+01
+</td>
+
+<td style="text-align:right;">
+
+78
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0120000
+</td>
+
+<td style="text-align:right;">
+
+2.270000e-01
+</td>
+
+<td style="text-align:right;">
+
+73
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+UV Absorption, relative conc. of organic constituents
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1.6000000
+</td>
+
+<td style="text-align:right;">
+
+4.400000e+00
+</td>
+
+<td style="text-align:right;">
+
+73
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 304
+</td>
+
+<td style="text-align:left;">
+
+Spectrometry - 5 x 2 matrix scan
+</td>
+
+<td style="text-align:right;">
+
+32305
+</td>
+
+<td style="text-align:left;">
+
+ABS04
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0017291
+</td>
+
+<td style="text-align:right;">
+
+2.483674e-01
+</td>
+
+<td style="text-align:right;">
+
+73
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+CDOM absorption (440nm)
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+CDOM absorption
+</td>
+
+<td style="text-align:left;">
+
+RTI
+</td>
+
+<td style="text-align:left;">
+
+m
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0793651
+</td>
+
+<td style="text-align:right;">
+
+2.813000e+01
+</td>
+
+<td style="text-align:right;">
+
+58
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+YSI EXO, 365/480/80 nm
+</td>
+
+<td style="text-align:right;">
+
+32295
+</td>
+
+<td style="text-align:left;">
+
+FL029
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+5.2500000
+</td>
+
+<td style="text-align:right;">
+
+9.320000e+01
+</td>
+
+<td style="text-align:right;">
+
+54
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+YSI EXO, 365/480/80 nm
+</td>
+
+<td style="text-align:right;">
+
+32322
+</td>
+
+<td style="text-align:left;">
+
+FL029
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RFU
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1.7500000
+</td>
+
+<td style="text-align:right;">
+
+2.448000e+01
+</td>
+
+<td style="text-align:right;">
+
+48
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Gross Alpha and Beta Activity in Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+00-01
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000073
+</td>
+
+<td style="text-align:right;">
+
+4.830000e-04
+</td>
+
+<td style="text-align:right;">
+
+41
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Determination of UV Absorbance at 440 nm in Water, by MDH modified
+method
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+MDH055
+</td>
+
+<td style="text-align:left;">
+
+MNPCA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000239
+</td>
+
+<td style="text-align:right;">
+
+3.582000e-03
+</td>
+
+<td style="text-align:right;">
+
+38
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, wf, 412 nm
+</td>
+
+<td style="text-align:right;">
+
+66700
+</td>
+
+<td style="text-align:left;">
+
+UV010
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000468
+</td>
+
+<td style="text-align:right;">
+
+5.267600e-03
+</td>
+
+<td style="text-align:right;">
+
+34
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+4.5500000
+</td>
+
+<td style="text-align:right;">
+
+4.280000e+01
+</td>
+
+<td style="text-align:right;">
+
+34
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 350 to 400 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32302
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000533
+</td>
+
+<td style="text-align:right;">
+
+8.895900e-03
+</td>
+
+<td style="text-align:right;">
+
+18
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 304
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32305
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0009441
+</td>
+
+<td style="text-align:right;">
+
+2.497560e-02
+</td>
+
+<td style="text-align:right;">
+
+18
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 290 to 350 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32301
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000715
+</td>
+
+<td style="text-align:right;">
+
+7.584400e-03
+</td>
+
+<td style="text-align:right;">
+
+14
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Determination of UV Absorbance at 440 nm in Water, by MDH modified
+method
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+MDH055
+</td>
+
+<td style="text-align:left;">
+
+MNPCA
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1.0000000
+</td>
+
+<td style="text-align:right;">
+
+1.000000e+00
+</td>
+
+<td style="text-align:right;">
+
+11
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 600 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32331
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0002522
+</td>
+
+<td style="text-align:right;">
+
+2.449000e-03
+</td>
+
+<td style="text-align:right;">
+
+10
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Computation by NWIS algorithm
+</td>
+
+<td style="text-align:right;">
+
+63162
+</td>
+
+<td style="text-align:left;">
+
+ALGOR
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0091553
+</td>
+
+<td style="text-align:right;">
+
+7.818130e-02
+</td>
+
+<td style="text-align:right;">
+
+8
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+5910 B ~ UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+APHA
+</td>
+
+<td style="text-align:left;">
+
+units/cm
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+</td>
+
+<td style="text-align:right;">
+
+3.540000e+00
+</td>
+
+<td style="text-align:right;">
+
+6
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+YSI EXO fluorometer, 365/480 nm
+</td>
+
+<td style="text-align:right;">
+
+32322
+</td>
+
+<td style="text-align:left;">
+
+FL017
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+RFU
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0600000
+</td>
+
+<td style="text-align:right;">
+
+1.266000e+01
+</td>
+
+<td style="text-align:right;">
+
+5
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm, Supor (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV006
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0000515
+</td>
+
+<td style="text-align:right;">
+
+1.520700e-03
+</td>
+
+<td style="text-align:right;">
+
+5
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 280 nm, Supor (annon)
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+UV002
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0001215
+</td>
+
+<td style="text-align:right;">
+
+1.596300e-03
+</td>
+
+<td style="text-align:right;">
+
+5
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 275 to 295 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+<td style="text-align:left;">
+
+Sag, specified wavelength range
+</td>
+
+<td style="text-align:right;">
+
+32300
+</td>
+
+<td style="text-align:left;">
+
+ABS02
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0002761
+</td>
+
+<td style="text-align:right;">
+
+1.240770e-02
+</td>
+
+<td style="text-align:right;">
+
+4
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+32314
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+49.8000000
+</td>
+
+<td style="text-align:right;">
+
+1.210000e+02
+</td>
+
+<td style="text-align:right;">
+
+3
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm, silver (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV004
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0014522
+</td>
+
+<td style="text-align:right;">
+
+1.645300e-03
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+Fluorescence scan, 250-620 nm
+</td>
+
+<td style="text-align:right;">
+
+32312
+</td>
+
+<td style="text-align:left;">
+
+FL020
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0524613
+</td>
+
+<td style="text-align:right;">
+
+2.471460e-01
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 280 nm, GFF (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+UV007
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0004394
+</td>
+
+<td style="text-align:right;">
+
+1.803810e-02
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 254 nm, GFF (NWQL)
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV005
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0010575
+</td>
+
+<td style="text-align:right;">
+
+1.838950e-02
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0002493
+</td>
+
+<td style="text-align:right;">
+
+2.774000e-04
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32299
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0006541
+</td>
+
+<td style="text-align:right;">
+
+1.257400e-03
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV - Absorbing Organic Compounds
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+5910-B
+</td>
+
+<td style="text-align:left;">
+
+KAWNATON_WQX
+</td>
+
+<td style="text-align:left;">
+
+cm
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+12.4000000
+</td>
+
+<td style="text-align:right;">
+
+1.240000e+01
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+UV Absorb, 280 nm,silver (annon)
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+UV001
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0002786
+</td>
+
+<td style="text-align:right;">
+
+2.786000e-04
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+Determination of UV Absorbance at 440 nm in Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+USEPA 415.3_440
+</td>
+
+<td style="text-align:left;">
+
+MNPCA
+</td>
+
+<td style="text-align:left;">
+
+\#/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+4.3300000
+</td>
+
+<td style="text-align:right;">
+
+4.330000e+00
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+L/mg-cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+258.2000000
+</td>
+
+<td style="text-align:right;">
+
+2.582000e+02
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm, corrected for Fe
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+L/mg-cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+238.5000000
+</td>
+
+<td style="text-align:right;">
+
+2.385000e+02
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+Determination of Total Organic Carbon and Specific UV Absorbance at 254
+nm in Source Water and Drinking Water
+</td>
+
+<td style="text-align:right;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+415.3
+</td>
+
+<td style="text-align:left;">
+
+USEPA
+</td>
+
+<td style="text-align:left;">
+
+\#/cm
+</td>
+
+<td style="text-align:left;">
+
+Total
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+22.3300000
+</td>
+
+<td style="text-align:right;">
+
+2.233000e+01
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:right;">
+
+61726
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+0.0000386
+</td>
+
+<td style="text-align:right;">
+
+3.860000e-05
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+<td style="text-align:left;">
+
+UV absorbance, wf, 254 nm
+</td>
+
+<td style="text-align:right;">
+
+50624
+</td>
+
+<td style="text-align:left;">
+
+UV008
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0001090
+</td>
+
+<td style="text-align:right;">
+
+1.090000e-04
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32296
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0025234
+</td>
+
+<td style="text-align:right;">
+
+2.523400e-03
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nm
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nanometers
+</td>
+
+<td style="text-align:left;">
+
+Absorbance, 200 to 800 nm
+</td>
+
+<td style="text-align:right;">
+
+32297
+</td>
+
+<td style="text-align:left;">
+
+ABS01
+</td>
+
+<td style="text-align:left;">
+
+USGS
+</td>
+
+<td style="text-align:left;">
+
+NA
+</td>
+
+<td style="text-align:left;">
+
+Dissolved
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+0.0014879
+</td>
+
+<td style="text-align:right;">
+
+1.487900e-03
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<br>
+
+The above process drops 0 rows, leaving 175.7 thousand remaining.
+
+<br>
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-29-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Flag based on field methods
+
+Next, we use the `field_flag` column to flag records based on the type
+of sampling equipment that was used:
+
+- `field_flag` = `0` when discrete sampling methods were used. Indicated
+  by detection of “grab”, “bucket”, “point”, “kemmerer”, “van dorn”,
+  “bailer”, or “bottle” in `SampleCollectionEquipmentName`
+- `field_flag` = `1` when integrated sampling methods were used.
+  Indicated by detection of “integrated”, “multiple”, or “pump” in
+  `SampleCollectionEquipmentName`
+- `field_flag` = `2` for all other records
+
+No records should be removed by this process and so there are 0 rows
+dropped leaving 175.7 thousand remaining in the harmonized CDOM dataset.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-31-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Miscellaneous flag
+
+Next, we populate the miscellaneous flag (`misc_flag`) column. The
+miscellaneous flag is used in this dataset to mark measurements that
+fall outside published maximum records based on a review of the relevant
+literature. We do this instead of filtering the records out, but a
+depth-related filter still occurs in the next harmonization step.
+
+For this flag column, values are as follows: 0 = does not exceed
+published range, 1 = below published minimum, and 2 = above published
+maximum. Absorption spectral slope parameters, SUVA, and Fluorescence
+index are checked for values below minimum **or** above maximum
+published records, while the rest of the parameter options are just
+checked for values above published maximums. We use the absolute value
+of absorption spectral slope when testing against thresholds.
+
+Thresholds used and citations are below, followed by a table with counts
+by parameters, unit, and flag value:
+
+| **Parameter** | **Units** | **Min value** | **Max value** | **Source** |
+|----|----|----|----|----|
+| Absorbance at 254 nm | AU/m | \- | 450 | Yates et al. 2023 |
+| Absorbance at 280 nm | AU/m | \- | 36.1 | Korak and McKay 2024 |
+| Absorbance at 370 nm | AU/m | \- | 11 | Korak and McKay 2024 |
+| Absorbance at 412 nm | AU/m | \- | 14 | We use the threshold for 440 nm (below) as a conservative estimate |
+| Absorbance at 440 nm | AU/m | \- | 14 | Brezonik et al. 2019 |
+| Absorption spectral slope (multiple) | nm-1 | 0.0026 | 0.0473 | Korak and McKay 2024 |
+| FDOM | RU | \- | 4.38 | Korak and McKay 2024 |
+| FDOM | ug/L, ug/l QSE | \- | 84.4 | Avouris et al. 2025 |
+| Fluorescence index | None | 1.31 | 2.18 | Korak and McKay 2024 |
+| SUVA | L/mgDOC\*m | 0.651 | 6.83 | Korak and McKay 2024 |
+
+<br>
+
+<table class=" lightable-paper table" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto; width: auto !important; margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+parameter
+</th>
+
+<th style="text-align:left;">
+
+harmonized_units
+</th>
+
+<th style="text-align:right;">
+
+misc_flag
+</th>
+
+<th style="text-align:right;">
+
+n
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+49634
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 254 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+3
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+27431
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1525
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2653
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+24
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2826
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+5347
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+<td style="text-align:left;">
+
+AU/m
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+12
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 275 to 295 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2681
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 275 to 295 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+3
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 290 to 350 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2679
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 290 to 350 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+5
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 350 to 400 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2671
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 350 to 400 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+8
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 350 to 400 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 400 to 500 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1414
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 600 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+973
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 600 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+10
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 676 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1543
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope, 412 to 676 nm
+</td>
+
+<td style="text-align:left;">
+
+nm-1
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+51
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+RFU
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2955
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+18391
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+RU
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+38
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+ug/L
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+1719
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+ug/L
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+633
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2053
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+FDOM
+</td>
+
+<td style="text-align:left;">
+
+ug/l QSE
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+291
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+2628
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+<td style="text-align:left;">
+
+None
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+37
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:right;">
+
+0
+</td>
+
+<td style="text-align:right;">
+
+43998
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:right;">
+
+1
+</td>
+
+<td style="text-align:right;">
+
+130
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SUVA
+</td>
+
+<td style="text-align:left;">
+
+L/mgDOC\*m
+</td>
+
+<td style="text-align:right;">
+
+2
+</td>
+
+<td style="text-align:right;">
+
+1374
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<br>
+
+No records should be removed by this process and so there are 0 rows
+dropped leaving 175.7 thousand remaining in the harmonized CDOM dataset.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-34-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Remove unrealistic values
+
+Before finalizing the dataset we check for and remove any depths \>
+592m, the deepest point in a lake in the U.S.
+
+0 rows are removed. The final row count after this is 175.7 thousand.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-36-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Aggregate simultaneous records
+
+The final step of CDOM harmonization is to aggregate simultaneous
+observations.
+
+**The aggregation process**: Any group of samples determined to be
+simultaneous are simplified into a single record containing the mean and
+coefficient of variation (CV) of the group. These can be either true
+duplicate entries in the WQP or records with non-identical values
+recorded at the same time and place and by the same organization (field
+and/or lab replicates/duplicates). The CV can be used to filter the
+dataset based on the amount of variability that is tolerable to specific
+use cases. Note, however, that many entries will have a CV that is `NA`
+because there are no simultaneous records or 0 because the records are
+duplicates and all entries have the same `harmonized_value`.
+
+We identify simultaneous records to aggregate by creating identical
+subgroups (`subgroup_id`) from the following columns: `parameter`,
+`OrganizationIdentifier`, `MonitoringLocationIdentifier`,
+`MonitoringLocationTypeName`, `ResolvedMonitoringLocationTypeName`,
+`ActivityStartDate`, `ActivityStartTime.Time`,
+`ActivityStartTime.TimeZoneCode`, `harmonized_tz`,
+`harmonized_local_time`, `harmonized_utc`, `ActivityStartDateTime`,
+`harmonized_top_depth_value`, `harmonized_top_depth_unit`,
+`harmonized_bottom_depth_value`, `harmonized_bottom_depth_unit`,
+`harmonized_discrete_depth_value`, `harmonized_discrete_depth_unit`,
+`depth_flag`, `mdl_flag`, `approx_flag`, `greater_flag`, `tier`,
+`field_flag`, `misc_flag`, `harmonized_units`. This selection limits the
+columns included in the final dataset, but we also provide a copy of the
+AquaMatch dataset prior to its aggregation (pipeline target
+`p3_cdom_preagg_grouped`; available as an RDS file in the data release:
+AquaMatch_harmonize_WQP/\_targets/objects/p3_cdom_preagg_grouped), and
+include the `subgroup_id` column, so that users can use the
+disaggregated data as well and match make joins between dataset
+versions.
+
+**Note**: We hold out any records where `misc_flag` is 1 or 2 from the
+aggregation step above, and as a result those records are *not* included
+in the `p3_cdom_preagg_grouped` object, nor its RDS export. The records
+are added back into the final dataset once the aggregation is complete,
+but they have `NA` for `subgroup_id`, `harmonized_value_cv`, and
+`harmonized_row_count` because they are never grouped or aggregated. We
+do this to allow end users to decide how they want to handle values that
+exceed published maximums.
+
+The final values are presented in the `harmonized_value` and
+`harmonized_value_cv` columns. The number of rows used per group is
+recorded in the `harmonized_row_count` column.
+
+1.6263^{4} rows dropped leaving 159.5 thousand remaining in the final
+harmonized and aggregated CDOM dataset.
+
+<figure>
+<img
+src="/Users/mbrousil/Documents/AquaMatch_documentation/chapters/08_cdom_harmonization_files/figure-gfm/unnamed-chunk-38-1.png"
+alt="Bar plot showing the row count update for the current harmonization step." />
+<figcaption aria-hidden="true">Bar plot showing the row count update for
+the current harmonization step.</figcaption>
+</figure>
+
+<br>
+
+### Harmonized CDOM
+
+At this point the harmonization of the CDOM data from the WQP is
+complete and we export the final dataset for use later in the workflow.
+
+Below are several sets of figures illustrating different qualities of
+the dataset:
+
+1.  Histograms showing the distribution of harmonized measurements (top)
+    and CVs (bottom) broken down by `tier` ***after*** aggregating
+    simultaneous records. There are very few simultaneous records in the
+    dataset, so only a few CVs are produced.
+
+<br>
+
+<img src="in/cdom/cdom_tier_dists_postagg.png" alt="Distribution of CDOM values by tier" width="650"/>
+
+<img src="in/cdom/cdom_tier_cv_dists_postagg.png" alt="Distribution of CDOM CVs by tier" width="650"/>
+
+<br>
+
+2.  Maps showing the geographic distribution of records by tier within
+    the US:
+
+<img src="in/cdom/cdom_tier_hex_map.png" alt="Geographic distribution of CDOM records by tier in the conterminous US" width="650"/>
+
+<br>
+
+3.  Bar charts showing the distribution of values by tier across years,
+    months, and days of the week:
+
+<img src="in/cdom/cdom_year_tier_chart.png" alt="Temporal distribution of CDOM records by tier across years" width="650"/>
+
+<img src="in/cdom/cdom_month_tier_chart.png" alt="Temporal distribution of CDOM records by tier across months" width="650"/>
+
+<img src="in/cdom/cdom_wday_tier_chart.png" alt="Temporal distribution of CDOM records by tier across days of the week" width="650"/>
+
+<br>
+
+4.  Lastly, bar charts showing the distribution of depth values by
+    parameter, location type, and tier:
+
+<img src="in/cdom/cdom_tier_top_depth_dist_postagg.png" alt="Distribution of harmonized_top_top_value column values by parameter, tier, and ResolvedMonitoringLocationTypeName" width="650"/>
+
+<img src="in/cdom/cdom_tier_bottom_depth_dist_postagg.png" alt="Distribution of harmonized_top_bottom_value column values by parameter, tier, and ResolvedMonitoringLocationTypeName" width="650"/>
+
+<img src="in/cdom/cdom_tier_discrete_depth_dist_postagg.png" alt="Distribution of harmonized_discrete_depth_value column values by parameter, tier, and ResolvedMonitoringLocationTypeName" width="650"/>
+
+<br>

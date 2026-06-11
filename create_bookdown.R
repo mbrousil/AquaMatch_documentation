@@ -13,18 +13,21 @@ bookdown_targets_list <- list(
   
   tar_file(tiering_overview_rmd,
            "bookdown_raw/03_tiering_overview.Rmd"),
-  # 
+  
   tar_file(chla_harmonization_rmd,
            "bookdown_raw/04_chla_harmonization.Rmd"),
-  # 
+  
   tar_file(doc_harmonization_rmd,
            "bookdown_raw/05_doc_harmonization.Rmd"),
-
+  
   tar_file(sdd_harmonization_rmd,
            "bookdown_raw/06_sdd_harmonization.Rmd"),
-
+  
   tar_file(tss_harmonization_rmd,
            "bookdown_raw/07_tss_harmonization.Rmd"),
+  
+  tar_file(cdom_harmonization_rmd,
+           "bookdown_raw/08_cdom_harmonization.Rmd"),
   
   tar_file(notes_rmd,
            "bookdown_raw/notes.Rmd"),
@@ -149,6 +152,25 @@ bookdown_targets_list <- list(
   ),
   
   tar_target(
+    cdom_harmonization_report,
+    render(
+      cdom_harmonization_rmd,
+      params = list(
+        documented_drops = p3_documented_drops_cdom,
+        cdom_chars = p1_wqp_params_cdom$cdom,
+        tiering_record = cdom_tiering_record,
+        param_drop_record = cdom_param_drop_record,
+        cdom_unit_table = cdom_unit_table,
+        cdom_misc_flag_table = cdom_misc_flag_table),
+      output_file = "08_cdom_harmonization",
+      output_dir = "chapters") %>%
+      change_ext(inext = "md", outext = "Rmd"),
+    format = "file",
+    packages = c("tidyverse", "bookdown", "ggrepel", "viridis", "kableExtra",
+                 "rmarkdown", "scales")
+  ),
+  
+  tar_target(
     notes,
     render(
       notes_rmd,
@@ -182,7 +204,7 @@ bookdown_targets_list <- list(
                               doc_harmonization_report,
                               sdd_harmonization_report,
                               tss_harmonization_report,
-                              # cdom_harmonization_report,
+                              cdom_harmonization_report,
                               notes,
                               references)),
     cue = tar_cue("always")

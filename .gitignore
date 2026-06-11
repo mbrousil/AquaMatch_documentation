@@ -49,3 +49,5 @@ scratch.R
 # ignore feather and rds files
 **.feather
 **.rds
+
+.DS_Store
