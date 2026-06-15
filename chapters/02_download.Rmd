@@ -29,120 +29,423 @@ map_df(.x = names_yaml,
 ```
 
 <table class=" lightable-material" style="font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+
 <thead>
+
 <tr>
+
 <th style="text-align:left;">
+
 parameter
 </th>
+
 <th style="text-align:left;">
+
 characteristicName
 </th>
+
 </tr>
+
 </thead>
+
 <tbody>
+
 <tr>
+
 <td style="text-align:left;vertical-align: top !important;" rowspan="7">
+
 chlorophyll
 </td>
+
 <td style="text-align:left;">
+
 Chlorophyll a
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Chlorophyll a (probe relative fluorescence)
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Chlorophyll a, corrected for pheophytin
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Chlorophyll a (probe)
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Chlorophyll a, free of pheophytin
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Chlorophyll a, uncorrected for pheophytin
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Chlorophyll a - Phytoplankton (suspended)
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;vertical-align: top !important;" rowspan="3">
+
 doc
 </td>
+
 <td style="text-align:left;">
+
 Organic carbon
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Total carbon
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Non-purgeable Organic Carbon (NPOC)
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;vertical-align: top !important;" rowspan="5">
+
 sdd
 </td>
+
 <td style="text-align:left;">
+
 Depth, Secchi disk depth
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Depth, Secchi disk depth (choice list)
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Secchi Reading Condition (choice list)
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Secchi depth
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Water transparency, Secchi disc
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;vertical-align: top !important;" rowspan="3">
+
 tss
 </td>
+
 <td style="text-align:left;">
+
 Total suspended solids
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Total Particulate Matter
 </td>
+
 </tr>
+
 <tr>
+
 <td style="text-align:left;">
+
 Suspended Sediment Concentration (SSC)
 </td>
+
 </tr>
+
+<tr>
+
+<td style="text-align:left;vertical-align: top !important;" rowspan="23">
+
+cdom
+</td>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nanometers
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 280 nm
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 370 nanometers
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 412 nm
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorbance at 440 nm
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption coefficient at 440 nm
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Absorption spectral slope (Sag)
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colored dissolved organic matter (CDOM)
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Emission intensity ratio
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence index
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 260 emission 450
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 304
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 275 emission 340
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 280 emission 370
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 300 emission 390
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 340 emission 440
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 370 emission 460
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 390 emission 510
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fluorescence, excitation 420 emission 460
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Specific UV Absorbance at 254 nm, corrected for Fe
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+UV 254
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+UV Absorption, relative conc. of organic constituents
+</td>
+
+</tr>
+
 </tbody>
+
 </table>
 
 <br>

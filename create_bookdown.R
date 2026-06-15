@@ -59,15 +59,16 @@ bookdown_targets_list <- list(
           p2_site_counts_chl,
           p2_site_counts_doc,
           p2_site_counts_sdd,
-          p2_site_counts_tss
+          p2_site_counts_tss,
+          p2_site_counts_cdom
         ),
         global_grid = p1_global_grid,
         yaml_contents = list(
           chlorophyll = p1_wqp_params_chl$chlorophyll,
           doc = p1_wqp_params_doc$doc,
           sdd = p1_wqp_params_sdd$sdd,
-          tss = p1_wqp_params_tss$tss#,
-          # cdom = p1_wqp_params_cdom$cdom
+          tss = p1_wqp_params_tss$tss,
+          cdom = p1_wqp_params_cdom$cdom
         )),
       output_file = "02_download",
       output_dir = "chapters") %>%
